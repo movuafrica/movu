@@ -1,3 +1,4 @@
+import { globalIgnores } from "eslint/config"
 import js from "@eslint/js"
 import pluginNext from "@next/eslint-plugin-next"
 import eslintConfigPrettier from "eslint-config-prettier"
@@ -14,6 +15,12 @@ import { config as baseConfig } from "./base.js"
  * @type {import("eslint").Linter.Config}
  * */
 export const nextJsConfig = [
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
   ...baseConfig,
   js.configs.recommended,
   eslintConfigPrettier,
