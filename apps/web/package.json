@@ -7,9 +7,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --max-warnings 0",
     "test": "playwright test",
-    "lint:fix": "next lint --fix",
+    "lint:fix": "eslint . --max-warnings 0 --fix",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
