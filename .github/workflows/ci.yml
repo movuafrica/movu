@@ -31,7 +31,7 @@ jobs:
         run: pnpm lint
 
       - name: Install Playwright browsers
-        run: pnpm --filter web exec playwright install --with-deps
+        run: pnpm --filter web exec playwright install --with-deps chromium
 
       - name: Test
         run: pnpm test
