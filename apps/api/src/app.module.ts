@@ -9,8 +9,8 @@ import { ZodValidationPipe } from 'nestjs-zod';
   providers: [
     {
       provide: APP_PIPE,
-      useClass: ZodValidationPipe
-    }
+      useClass: ZodValidationPipe,
+    },
   ],
 })
-export class AppModule { }
+export class AppModule {}

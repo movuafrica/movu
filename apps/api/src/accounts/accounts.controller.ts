@@ -10,10 +10,10 @@ export class AccountsController {
   @Get()
   @ApiOperation({ summary: 'Find all accounts' })
   findAll(): AccountResponseDto[] {
-    const accounts: Account[] = []
+    const accounts: Account[] = [];
 
-    console.log(accounts)
-    return accounts
+    console.log(accounts);
+    return accounts;
   }
 
   @Post()
@@ -23,7 +23,7 @@ export class AccountsController {
       ...createAccountDto,
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
+      updatedAt: new Date().toISOString(),
+    };
   }
 }

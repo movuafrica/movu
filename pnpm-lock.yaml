@@ -78,6 +78,9 @@ importers:
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.3
+      '@workspace/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
       '@workspace/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
