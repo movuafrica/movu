@@ -19,6 +19,12 @@ import {
   FieldLabel,
 } from "@workspace/ui/components/field"
 import { Input } from "@workspace/ui/components/input"
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@workspace/ui/components/input-otp"
 
 export function SignupForm({
   className,
@@ -83,30 +89,56 @@ export function SignupForm({
       <div className={cn("flex flex-col gap-6", className)} {...props}>
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-xl">Verify your email</CardTitle>
+            <CardTitle className="text-xl">Check your inbox</CardTitle>
             <CardDescription>
-              We sent a code to <strong>{email}</strong>. Enter it below.
+              We sent a 6-digit code to <strong>{email}</strong>.
+              <br />
+              Enter it below to verify your account.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleVerification}>
               <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="code">Verification code</FieldLabel>
-                  <Input
-                    id="code"
-                    type="text"
-                    placeholder="123456"
-                    required
+                <Field className="flex flex-col items-center gap-4 py-2">
+                  <InputOTP
+                    maxLength={6}
                     value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                  />
+                    onChange={setCode}
+                    autoFocus
+                    containerClassName="w-full justify-between"
+                  >
+                    <InputOTPGroup className="w-full gap-2">
+                      <InputOTPSlot index={0} className="h-14 w-full text-xl rounded-lg border" />
+                      <InputOTPSlot index={1} className="h-14 w-full text-xl rounded-lg border" />
+                      <InputOTPSlot index={2} className="h-14 w-full text-xl rounded-lg border" />
+                    </InputOTPGroup>
+                    <InputOTPSeparator />
+                    <InputOTPGroup className="w-full gap-2">
+                      <InputOTPSlot index={3} className="h-14 w-full text-xl rounded-lg border" />
+                      <InputOTPSlot index={4} className="h-14 w-full text-xl rounded-lg border" />
+                      <InputOTPSlot index={5} className="h-14 w-full text-xl rounded-lg border" />
+                    </InputOTPGroup>
+                  </InputOTP>
+                  {error && (
+                    <p className="text-destructive text-sm text-center">{error}</p>
+                  )}
                 </Field>
-                {error && <p className="text-destructive text-sm">{error}</p>}
                 <Field>
-                  <Button type="submit" disabled={loading}>
+                  <Button type="submit" disabled={loading || code.length < 6}>
                     {loading ? "Verifying…" : "Verify email"}
                   </Button>
+                  <FieldDescription className="text-center">
+                    Didn&apos;t receive a code?{" "}
+                    <button
+                      type="button"
+                      className="underline-offset-4 hover:underline"
+                      onClick={async () => {
+                        await signUp?.prepareEmailAddressVerification({ strategy: "email_code" })
+                      }}
+                    >
+                      Resend
+                    </button>
+                  </FieldDescription>
                 </Field>
               </FieldGroup>
             </form>
@@ -127,6 +159,7 @@ export function SignupForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
+            <div id="clerk-captcha" />
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="name">Full Name</FieldLabel>
