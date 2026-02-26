@@ -5,7 +5,7 @@ import { CreateAccountDto } from './dto/create-account.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('accounts')
-@ApiTags()
+@ApiTags('accounts')
 export class AccountsController {
   @Get()
   @ApiOperation({ summary: 'Find all accounts' })
