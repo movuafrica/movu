@@ -32,7 +32,7 @@
     },
     "test": {
       "dependsOn": [
-        "^lint"
+        "^build"
       ]
     },
     "dev": {
