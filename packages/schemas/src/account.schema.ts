@@ -27,6 +27,7 @@ export const UpdateAccountSchema = CreateAccountSchema.partial().meta({
 })
 export type UpdateAccount = z.infer<typeof UpdateAccountSchema>;
 
-export const UserResponse = AccountSchema.meta({
-  id: "UserResponse"
+export const AccountResponseSchema = AccountSchema.meta({
+  id: "AccountResponse"
 })
+export type AccountResponse = z.infer<typeof AccountResponseSchema>;
