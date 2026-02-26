@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@workspace/typescript-config": "workspace:*",
+    "@workspace/schemas": "workspace:*",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@nestjs/cli": "^11.0.0",
