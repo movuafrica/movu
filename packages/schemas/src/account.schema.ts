@@ -16,6 +16,7 @@ export type Account = z.infer<typeof AccountSchema>;
 export const CreateAccountSchema = AccountSchema.omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 }).meta({
   id: "CreateAccount"
 })
