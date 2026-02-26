@@ -1,3 +1,4 @@
+import { LogoutButton } from "@/components/logout-button"
 import { Button } from "@workspace/ui/components/button"
 
 export default function Page() {
@@ -9,6 +10,7 @@ export default function Page() {
           <Button>Button</Button>
           <Button variant="outline">Outline</Button>
         </div>
+        <LogoutButton />
       </div>
     </div>
   )
