@@ -168,7 +168,7 @@ export function LoginForm({
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Enter new password</CardTitle>
             <CardDescription>
-              Enter the 6-digit security code has been sent to your email.
+              Enter the 6-digit security code that has been sent to your email.
             </CardDescription>
           </CardHeader>
           <CardContent>
