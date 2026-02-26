@@ -1,5 +1,4 @@
 // @ts-check
-import { config as baseConfig } from '@workspace/eslint-config/base';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -8,7 +7,6 @@ export default tseslint.config(
   {
     ignores: ['eslint.config.mjs', 'dist/**'],
   },
-  ...baseConfig,
   eslintPluginPrettierRecommended,
   {
     languageOptions: {
