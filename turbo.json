@@ -2,7 +2,8 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "globalEnv": [
-    "CI"
+    "CI",
+    "PORT"
   ],
   "tasks": {
     "build": {
