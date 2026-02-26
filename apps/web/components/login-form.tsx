@@ -17,7 +17,6 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from "@workspace/ui/components/field"
 import { Input } from "@workspace/ui/components/input"
 
@@ -89,9 +88,11 @@ export function LoginForm({
                   Login with Google
                 </Button>
               </Field>
-              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-                Or continue with
-              </FieldSeparator>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <div className="h-px flex-1 bg-border" />
+                <span>Or continue with</span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
