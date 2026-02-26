@@ -1,4 +1,4 @@
-import { createZodDto } from "nestjs-zod";
+import { createZodDto } from 'nestjs-zod';
 import { AccountResponseSchema } from '@workspace/schemas';
 
-export class AccountResponseDto extends createZodDto(AccountResponseSchema) { }
+export class AccountResponseDto extends createZodDto(AccountResponseSchema) {}
