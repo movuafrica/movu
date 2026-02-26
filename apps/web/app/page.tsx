@@ -4,7 +4,7 @@ import { Account } from "@workspace/schemas";
 
 
 const account: Account = {
-  id: "123",
+  id: "123e4567-e89b-12d3-a456-426614174000",
   kind: "personal",
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
