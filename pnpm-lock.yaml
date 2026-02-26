@@ -38,6 +38,9 @@ importers:
       '@nestjs/swagger':
         specifier: ^11.2.6
         version: 11.2.6(@nestjs/common@11.1.14(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.14)(reflect-metadata@0.2.2)
+      '@workspace/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
       nestjs-zod:
         specifier: ^5.1.1
         version: 5.1.1(@nestjs/common@11.1.14(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/swagger@11.2.6(@nestjs/common@11.1.14(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.14)(reflect-metadata@0.2.2))(rxjs@7.8.2)(zod@4.3.6)
@@ -81,9 +84,6 @@ importers:
       '@workspace/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
-      '@workspace/schemas':
-        specifier: workspace:*
-        version: link:../../packages/schemas
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
