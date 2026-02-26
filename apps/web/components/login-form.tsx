@@ -19,6 +19,14 @@ import {
   FieldLabel,
 } from "@workspace/ui/components/field"
 import { Input } from "@workspace/ui/components/input"
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@workspace/ui/components/input-otp"
+
+type View = "login" | "forgot" | "reset"
 
 export function LoginForm({
   className,
@@ -27,8 +35,12 @@ export function LoginForm({
   const { signIn, setActive, isLoaded } = useSignIn()
   const router = useRouter()
 
+  const [view, setView] = useState<View>("login")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmNewPassword, setConfirmNewPassword] = useState("")
+  const [code, setCode] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -43,9 +55,50 @@ export function LoginForm({
         await setActive({ session: result.createdSessionId })
         router.push("/")
       }
+    } catch {
+      setError("Invalid email or password.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleForgotPassword(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (!isLoaded) return
+    setLoading(true)
+    setError("")
+    try {
+      await signIn.create({ strategy: "reset_password_email_code", identifier: email })
+    } catch {
+      // Swallow the error — always advance to mask whether the account exists
+    } finally {
+      setLoading(false)
+    }
+    setView("reset")
+  }
+
+  async function handleResetPassword(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (!isLoaded) return
+    if (newPassword !== confirmNewPassword) {
+      setError("Passwords do not match.")
+      return
+    }
+    setLoading(true)
+    setError("")
+    try {
+      const result = await signIn.attemptFirstFactor({
+        strategy: "reset_password_email_code",
+        code,
+        password: newPassword,
+      })
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId })
+        router.push("/")
+      }
     } catch (err: unknown) {
       const clerkErr = err as { errors?: { message: string }[] }
-      setError(clerkErr.errors?.[0]?.message ?? "Something went wrong.")
+      setError(clerkErr.errors?.[0]?.message ?? "Invalid code or password.")
     } finally {
       setLoading(false)
     }
@@ -58,6 +111,134 @@ export function LoginForm({
       redirectUrl: "/sso-callback",
       redirectUrlComplete: "/",
     })
+  }
+
+  if (view === "forgot") {
+    return (
+      <div className={cn("flex flex-col gap-6", className)} {...props}>
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">Reset your password</CardTitle>
+            <CardDescription>
+              Enter your email and we&apos;ll send you a reset code.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleForgotPassword}>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="forgot-email">Email</FieldLabel>
+                  <Input
+                    id="forgot-email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    autoFocus
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </Field>
+                {error && <p className="text-destructive text-sm">{error}</p>}
+                <Field>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? "Sending…" : "Send reset code"}
+                  </Button>
+                  <FieldDescription className="text-center">
+                    <button
+                      type="button"
+                      className="underline-offset-4 hover:underline"
+                      onClick={() => { setError(""); setView("login") }}
+                    >
+                      Back to login
+                    </button>
+                  </FieldDescription>
+                </Field>
+              </FieldGroup>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (view === "reset") {
+    return (
+      <div className={cn("flex flex-col gap-6", className)} {...props}>
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">Enter new password</CardTitle>
+            <CardDescription>
+              Enter the 6-digit security code has been sent to your email.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleResetPassword}>
+              <FieldGroup>
+                <Field className="flex flex-col items-center gap-4 py-2">
+                  <InputOTP
+                    maxLength={6}
+                    value={code}
+                    onChange={setCode}
+                    autoFocus
+                    containerClassName="w-full justify-between"
+                  >
+                    <InputOTPGroup className="w-full gap-2">
+                      <InputOTPSlot index={0} className="h-14 w-full text-xl rounded-lg border" />
+                      <InputOTPSlot index={1} className="h-14 w-full text-xl rounded-lg border" />
+                      <InputOTPSlot index={2} className="h-14 w-full text-xl rounded-lg border" />
+                    </InputOTPGroup>
+                    <InputOTPSeparator />
+                    <InputOTPGroup className="w-full gap-2">
+                      <InputOTPSlot index={3} className="h-14 w-full text-xl rounded-lg border" />
+                      <InputOTPSlot index={4} className="h-14 w-full text-xl rounded-lg border" />
+                      <InputOTPSlot index={5} className="h-14 w-full text-xl rounded-lg border" />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="new-password">New password</FieldLabel>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="confirm-new-password">Confirm new password</FieldLabel>
+                  <Input
+                    id="confirm-new-password"
+                    type="password"
+                    required
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  />
+                  <FieldDescription>Must be at least 8 characters long.</FieldDescription>
+                </Field>
+                {error && <p className="text-destructive text-sm">{error}</p>}
+                <Field>
+                  <Button type="submit" disabled={loading || code.length < 6}>
+                    {loading ? "Resetting…" : "Reset password"}
+                  </Button>
+                  <FieldDescription className="text-center">
+                    <button
+                      type="button"
+                      className="underline-offset-4 hover:underline"
+                      onClick={async () => {
+                        await signIn?.create({ strategy: "reset_password_email_code", identifier: email })
+                      }}
+                    >
+                      Resend code
+                    </button>
+                  </FieldDescription>
+                </Field>
+              </FieldGroup>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -107,12 +288,13 @@ export function LoginForm({
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
+                  <button
+                    type="button"
                     className="ml-auto text-sm underline-offset-4 hover:underline"
+                    onClick={() => { setError(""); setView("forgot") }}
                   >
                     Forgot your password?
-                  </a>
+                  </button>
                 </div>
                 <Input
                   id="password"

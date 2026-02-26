@@ -74,7 +74,7 @@ function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="input-otp-separator"
-      className="[&_svg:not([class*='size-'])]:size-4 flex items-center"
+      className="[&_svg:not([class*='size-'])]:size-4 flex items-center text-muted-foreground/30"
       role="separator"
       {...props}
     >
