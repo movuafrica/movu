@@ -1,5 +1,5 @@
-import { Button } from "@workspace/ui/components/button"
 import { LogoutButton } from "@/components/logout-button"
+import { Button } from "@workspace/ui/components/button"
 
 export default function Page() {
   return (

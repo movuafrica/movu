@@ -72,6 +72,7 @@ export function LoginForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
+            <div id="clerk-captcha" />
             <FieldGroup>
               <Field>
                 <Button
