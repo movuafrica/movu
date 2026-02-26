@@ -5,12 +5,13 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  {
-    ignores: ['eslint.config.mjs', 'dist/**'],
-  },
   ...baseConfig,
+  {
+    ignores: ['eslint.config.mjs'],
+  },
   eslintPluginPrettierRecommended,
   {
+    files: ['src/**/*.ts', 'test/**/*.ts'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -22,8 +23,6 @@ export default tseslint.config(
         tsconfigRootDir: import.meta.dirname,
       },
     },
-  },
-  {
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
