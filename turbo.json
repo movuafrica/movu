@@ -16,7 +16,8 @@
       ],
       "outputs": [
         ".next/**",
-        "!.next/cache/**"
+        "!.next/cache/**",
+        "dist/**"
       ]
     },
     "lint": {
@@ -31,7 +32,7 @@
     },
     "test": {
       "dependsOn": [
-        "^lint"
+        "^build"
       ]
     },
     "dev": {
