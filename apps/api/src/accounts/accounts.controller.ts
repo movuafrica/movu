@@ -1,32 +1,42 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { Account } from '@workspace/schemas';
-import { AccountResponseDto } from './dto/account-response.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { PrismaService } from 'nestjs-prisma';
+import { UpdateAccountDto } from './dto/update-account.dto';
 
 @Controller('accounts')
-@ApiTags('accounts')
 export class AccountsController {
-  constructor(private prisma: PrismaService) { }
-
-  @Get()
-  @ApiOperation({ summary: 'Find all accounts' })
-  async findAll(): Promise<AccountResponseDto[]> {
-    const accounts: Account[] = await this.prisma.account.findMany();
-
-    console.log(accounts);
-    return accounts;
-  }
+  constructor(private readonly accountsService: AccountsService) { }
 
   @Post()
-  @ApiOperation({ summary: 'Create a new account' })
-  create(@Body() createAccountDto: CreateAccountDto): AccountResponseDto {
-    return {
-      ...createAccountDto,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  create(@Body() createAccountDto: CreateAccountDto) {
+    return this.accountsService.create(createAccountDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.accountsService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.accountsService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateAccountDto: UpdateAccountDto) {
+    return this.accountsService.update(id, updateAccountDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.accountsService.remove(id);
   }
 }

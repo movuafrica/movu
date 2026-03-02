@@ -1,10 +1,11 @@
 import { z } from "zod";
 
-export const AccountKind = z.enum(["business", "personal"]);
+export const AccountKind = z.enum(["BUSINESS", "PERSONAL"]);
 export type AccountKind = z.infer<typeof AccountKind>;
 
 export const AccountSchema = z.object({
   id: z.uuid(),
+  userId: z.string(),
   kind: AccountKind,
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),

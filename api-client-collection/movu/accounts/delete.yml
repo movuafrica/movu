@@ -1,0 +1,25 @@
+info:
+  name: delete
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://localhost:3001/accounts
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "userId": "jnsren231",
+        "kind": "PERSONAL"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
