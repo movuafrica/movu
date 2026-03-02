@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { SeedsService } from './seeds.service';
+import { AccountsSeed } from './domains/accounts.seed';
+import { AccountsModule } from '../accounts/accounts.module';
 
 @Module({
-  providers: [SeedsService]
+  imports: [AccountsModule],
+  providers: [SeedsService, AccountsSeed],
 })
-export class SeedsModule {}
+export class SeedsModule { }
