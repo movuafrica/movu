@@ -10,5 +10,3 @@ export const accounts = pgTable('accounts', {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 });
 
-export type Account = typeof accounts.$inferSelect;
-export type NewAccount = typeof accounts.$inferInsert;

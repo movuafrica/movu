@@ -1,49 +1,53 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
-import { DbService } from '../db/db.service';
-import { accounts } from '../db/schema';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { DB_CONNECTION } from '../db/db.connection';
+import * as schema from './schema';
 
 @Injectable()
 export class AccountsService {
-  constructor(private readonly db: DbService) { }
+  constructor(
+    @Inject(DB_CONNECTION) private readonly db: NodePgDatabase<typeof schema>,
+  ) { }
 
   async create(createAccountDto: CreateAccountDto) {
-    const [account] = await this.db.db
-      .insert(accounts)
+    const [account] = await this.db
+      .insert(schema.accounts)
       .values(createAccountDto)
       .returning();
     return account;
   }
 
   findAll() {
-    return this.db.db.select().from(accounts);
+    return this.db.select().from(schema.accounts);
   }
 
   async findOne(id: string) {
-    const [account] = await this.db.db
+    const [account] = await this.db
       .select()
-      .from(accounts)
-      .where(eq(accounts.id, id));
+      .from(schema.accounts)
+      .where(eq(schema.accounts.id, id));
     if (!account) throw new NotFoundException(`Account ${id} not found`);
     return account;
   }
 
   async update(id: string, updateAccountDto: UpdateAccountDto) {
-    const [account] = await this.db.db
-      .update(accounts)
+    const [account] = await this.db
+      .update(schema.accounts)
       .set({ ...updateAccountDto, updatedAt: new Date() })
-      .where(eq(accounts.id, id))
+      .where(eq(schema.accounts.id, id))
       .returning();
     if (!account) throw new NotFoundException(`Account ${id} not found`);
     return account;
   }
 
   async remove(id: string) {
-    const [account] = await this.db.db
-      .delete(accounts)
-      .where(eq(accounts.id, id))
+    const [account] = await this.db
+      .delete(schema.accounts)
+      .where(eq(schema.accounts.id, id))
       .returning();
     if (!account) throw new NotFoundException(`Account ${id} not found`);
     return account;
