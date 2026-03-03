@@ -4,7 +4,7 @@ import { AccountsService } from '../../../accounts/accounts.service';
 
 @Injectable()
 export class AccountsSeed {
-  constructor(private readonly accounts: AccountsService) { }
+  constructor(private readonly accounts: AccountsService) {}
 
   private CLERK_TEST_USER_IDS = [
     'user_3ARxiqEfSGZdDCYuW5fk2kahE2B',

@@ -7,4 +7,4 @@ import { AccountsModule } from '../../accounts/accounts.module';
   imports: [AccountsModule],
   providers: [SeedsService, AccountsSeed],
 })
-export class SeedsModule { }
+export class SeedsModule {}

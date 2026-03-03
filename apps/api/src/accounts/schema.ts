@@ -9,4 +9,3 @@ export const accounts = pgTable('accounts', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 });
-

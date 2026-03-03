@@ -11,7 +11,7 @@ import * as schema from './schema';
 export class AccountsService {
   constructor(
     @Inject(DB_CONNECTION) private readonly db: NodePgDatabase<typeof schema>,
-  ) { }
+  ) {}
 
   async create(createAccountDto: CreateAccountDto) {
     const [account] = await this.db
