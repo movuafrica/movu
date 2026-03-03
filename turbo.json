@@ -4,7 +4,8 @@
   "globalEnv": [
     "CI",
     "PORT",
-    "DATABASE_URL"
+    "DATABASE_URL",
+    "MOVU_API_URL"
   ],
   "tasks": {
     "build": {
