@@ -37,6 +37,20 @@
         ]
       }
     },
+    "/accounts/me": {
+      "get": {
+        "operationId": "AccountsController_findMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
     "/accounts/{id}": {
       "get": {
         "operationId": "AccountsController_findOne",

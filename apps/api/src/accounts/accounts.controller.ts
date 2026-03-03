@@ -10,10 +10,12 @@ import {
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { CurrentAuth } from '../common/auth/current-auth.decorator';
+import type { ClerkAuthContext } from '@workspace/schemas';
 
 @Controller('accounts')
 export class AccountsController {
-  constructor(private readonly accountsService: AccountsService) {}
+  constructor(private readonly accountsService: AccountsService) { }
 
   @Post()
   create(@Body() createAccountDto: CreateAccountDto) {
@@ -23,6 +25,11 @@ export class AccountsController {
   @Get()
   findAll() {
     return this.accountsService.findAll();
+  }
+
+  @Get('me')
+  findMe(@CurrentAuth() auth: ClerkAuthContext) {
+    return this.accountsService.findByUserId(auth.userId);
   }
 
   @Get(':id')
