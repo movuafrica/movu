@@ -10,6 +10,17 @@ async function bootstrap() {
     .setTitle('Movu API')
     .setDescription('Backend for all movu services')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description:
+          'Use a Clerk session token (Authorization: Bearer <token>).',
+      },
+      'clerkSession',
+    )
+    .addSecurityRequirements('clerkSession')
     .build();
 
   const rawDocument = SwaggerModule.createDocument(app, config);

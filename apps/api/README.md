@@ -31,6 +31,23 @@
 $ pnpm install
 ```
 
+## Environment variables
+
+Create an `.env` file in `apps/api` (or inject the values in your host environment) with the Clerk settings used by the authentication guard:
+
+```
+# Required when verifying session tokens without a network hop.
+CLERK_JWT_KEY="-----BEGIN PUBLIC KEY-----..."
+
+# Optional fallback if you prefer server-side verification via Clerk's Backend API.
+# CLERK_SECRET_KEY="sk_live_..."
+
+# Comma-separated list of allowed frontends (used for the `azp` claim check).
+CLERK_AUTHORIZED_PARTIES="http://localhost:3000,https://app.movu.africa"
+```
+
+Only `CLERK_JWT_KEY` **or** `CLERK_SECRET_KEY` is required at runtime. Supplying both allows the API to fall back to the secret key if the PEM key is not present.
+
 ## Compile and run the project
 
 ```bash

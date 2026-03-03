@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { AccountsModule } from './accounts/accounts.module';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { PrismaModule } from './prisma.module';
 import { SeedsModule } from './seeds/seeds.module';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exception.filter';
 import { ConfigModule } from '@nestjs/config';
+import { ClerkAuthGuard } from './common/auth/clerk-auth.guard';
 
 @Module({
   imports: [
@@ -25,6 +26,10 @@ import { ConfigModule } from '@nestjs/config';
     {
       provide: APP_FILTER,
       useClass: PrismaClientExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ClerkAuthGuard,
     },
   ],
 })
