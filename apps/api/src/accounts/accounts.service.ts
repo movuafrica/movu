@@ -25,6 +25,16 @@ export class AccountsService {
     return this.db.select().from(schema.accounts);
   }
 
+  async findByUserId(userId: string) {
+    const [account] = await this.db
+      .select()
+      .from(schema.accounts)
+      .where(eq(schema.accounts.userId, userId));
+    if (!account)
+      throw new NotFoundException(`Account for user ${userId} not found`);
+    return account;
+  }
+
   async findOne(id: string) {
     const [account] = await this.db
       .select()
