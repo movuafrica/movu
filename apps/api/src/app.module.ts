@@ -28,4 +28,4 @@ import { ClerkAuthGuard } from './common/auth/clerk-auth.guard';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

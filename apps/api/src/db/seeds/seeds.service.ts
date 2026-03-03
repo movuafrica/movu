@@ -5,7 +5,7 @@ import { AccountsSeed } from './domains/accounts.seed';
 export class SeedsService {
   private readonly logger = new Logger(SeedsService.name);
 
-  constructor(private readonly accountSeed: AccountsSeed) { }
+  constructor(private readonly accountSeed: AccountsSeed) {}
 
   async run() {
     this.logger.log('🌱 Running seeds...');
