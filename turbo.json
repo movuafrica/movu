@@ -40,7 +40,23 @@
         "^build"
       ]
     },
+    "generate:schema": {
+      "outputs": [
+        "openapi.json"
+      ]
+    },
+    "generate:api-types": {
+      "dependsOn": [
+        "api#generate:schema"
+      ],
+      "outputs": [
+        "lib/api-types.generated.ts"
+      ]
+    },
     "dev": {
+      "dependsOn": [
+        "generate:api-types"
+      ],
       "cache": false,
       "persistent": true
     }

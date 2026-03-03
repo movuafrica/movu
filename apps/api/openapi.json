@@ -1,0 +1,177 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/accounts": {
+      "post": {
+        "operationId": "AccountsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccount"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Accounts"
+        ]
+      },
+      "get": {
+        "operationId": "AccountsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/accounts/{id}": {
+      "get": {
+        "operationId": "AccountsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Accounts"
+        ]
+      },
+      "patch": {
+        "operationId": "AccountsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAccount"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Accounts"
+        ]
+      },
+      "delete": {
+        "operationId": "AccountsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Accounts"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Movu API",
+    "description": "Backend for all movu services",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "clerkSession": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Use a Clerk session token (Authorization: Bearer <token>)."
+      }
+    },
+    "schemas": {
+      "CreateAccount": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BUSINESS",
+              "PERSONAL"
+            ]
+          }
+        },
+        "required": [
+          "userId",
+          "kind"
+        ],
+        "id": "CreateAccount"
+      },
+      "UpdateAccount": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BUSINESS",
+              "PERSONAL"
+            ]
+          }
+        },
+        "id": "UpdateAccount"
+      }
+    }
+  },
+  "security": [
+    {
+      "clerkSession": []
+    }
+  ]
+}
