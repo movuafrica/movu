@@ -15,7 +15,7 @@ import type { ClerkAuthContext } from '@workspace/schemas';
 
 @Controller('accounts')
 export class AccountsController {
-  constructor(private readonly accountsService: AccountsService) { }
+  constructor(private readonly accountsService: AccountsService) {}
 
   @Post()
   create(@Body() createAccountDto: CreateAccountDto) {
