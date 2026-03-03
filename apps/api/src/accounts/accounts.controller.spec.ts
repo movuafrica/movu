@@ -1,29 +1,33 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AccountsController } from './accounts.controller';
 import { AccountsService } from './accounts.service';
-import { PrismaService } from '../prisma.service';
+import { DbService } from '../db/db.service';
 
 describe('AccountsController', () => {
   let controller: AccountsController;
 
   beforeEach(async () => {
-    const prismaMock = {
-      account: {
-        create: jest.fn(),
-        findMany: jest.fn(),
-        findUniqueOrThrow: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
+    const dbServiceMock = {
+      db: {
+        insert: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        update: jest.fn().mockReturnThis(),
+        delete: jest.fn().mockReturnThis(),
+        from: jest.fn().mockReturnThis(),
+        values: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        returning: jest.fn().mockResolvedValue([]),
       },
-    } as unknown as PrismaService;
+    } as unknown as DbService;
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AccountsController],
       providers: [
         AccountsService,
         {
-          provide: PrismaService,
-          useValue: prismaMock,
+          provide: DbService,
+          useValue: dbServiceMock,
         },
       ],
     }).compile();
