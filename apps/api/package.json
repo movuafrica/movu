@@ -8,6 +8,7 @@
   "scripts": {
     "db:seed": "pnpm ts-node src/db/seeds/seeder.ts",
     "db:generate": "drizzle-kit generate",
+    "generate:schema": "ts-node -r tsconfig-paths/register src/openapi.ts",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "build": "nest build",
