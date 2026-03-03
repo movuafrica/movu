@@ -3,7 +3,7 @@ import { AccountsModule } from './accounts/accounts.module';
 import { APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { DbModule } from './db/db.module';
-import { SeedsModule } from './seeds/seeds.module';
+import { SeedsModule } from './db/seeds/seeds.module';
 import { ConfigModule } from '@nestjs/config';
 import { ClerkAuthGuard } from './common/auth/clerk-auth.guard';
 

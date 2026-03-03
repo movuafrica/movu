@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "seed": "pnpm ts-node src/seeder.ts",
+    "db:seed": "pnpm ts-node src/db/seeds/seeder.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
