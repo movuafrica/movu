@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AccountKind } from '@workspace/schemas';
-import { AccountsService } from '../../accounts/accounts.service';
+import { AccountsService } from '../../../accounts/accounts.service';
 
 @Injectable()
 export class AccountsSeed {
