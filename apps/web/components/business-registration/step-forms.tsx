@@ -33,6 +33,7 @@ export function ContactDetailsStep({ formData, onChange, onSelectChange }: StepP
       <Field>
         <FieldLabel htmlFor="phoneNumber">Phone Number</FieldLabel>
         <PhoneInput
+          name="phoneNumber"
           value={formData.phoneNumber}
           onChange={(v) => onSelectChange("phoneNumber", v)}
           required

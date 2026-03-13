@@ -26,9 +26,10 @@ type PhoneInputProps = {
   onChange: (value: string) => void
   defaultCountry?: Country
   required?: boolean
+  name?: string
 }
 
-export function PhoneInput({ value, onChange, defaultCountry = "ZA", required }: PhoneInputProps) {
+export function PhoneInput({ value, onChange, defaultCountry = "ZA", required, name }: PhoneInputProps) {
   return (
     <div
       className={cn(
@@ -43,6 +44,7 @@ export function PhoneInput({ value, onChange, defaultCountry = "ZA", required }:
         onChange={(v) => onChange(v ?? "")}
         inputComponent={BareInput}
         required={required}
+        name={name}
       />
     </div>
   )

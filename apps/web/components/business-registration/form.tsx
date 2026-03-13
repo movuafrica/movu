@@ -2,7 +2,7 @@
 
 import { useState, useActionState, useEffect } from "react"
 import { useUser } from "@clerk/nextjs"
-import { ChevronLeft } from "lucide-react"
+import { AlertCircle, ChevronLeft } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import {
   ContactDetailsStep,
@@ -14,6 +14,7 @@ import { REGISTRATION_STEPS } from "./constants"
 import { INITIAL_FORM_DATA } from "./types"
 import type { RegistrationFormData } from "./types"
 import { completeBusinessRegistration } from "@/actions/onboarding/complete-business-registration"
+import type { RegistrationState } from "@/actions/onboarding/complete-business-registration"
 import { isValidPhoneNumber } from "./phone-input"
 import { MovuLogo } from "../movu-logo"
 
@@ -39,7 +40,7 @@ const STEP_SUBTITLES = [
 ]
 
 export function BusinessRegistrationForm() {
-  const [state, action, isPending] = useActionState(completeBusinessRegistration, null)
+  const [state, action, isPending] = useActionState<RegistrationState | null, FormData>(completeBusinessRegistration, null)
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState<RegistrationFormData>(INITIAL_FORM_DATA)
   const { user } = useUser()
@@ -128,7 +129,34 @@ export function BusinessRegistrationForm() {
         </div>
 
         {state?.error && (
-          <p className="text-sm text-destructive">{state.error}</p>
+          <div className="flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+              <span className="font-medium">{state.error}</span>
+            </div>
+            {state.missingFields && state.missingFields.length > 0 && (() => {
+              const byStep = state.missingFields.reduce<Record<number, string[]>>((acc, f) => {
+                ;(acc[f.step] ??= []).push(f.label)
+                return acc
+              }, {})
+              return (
+                <ul className="flex flex-col gap-1.5 pl-6">
+                  {Object.entries(byStep).map(([step, labels]) => (
+                    <li key={step} className="flex items-center justify-between gap-2">
+                      <span>{labels.join(", ")}</span>
+                      <button
+                        type="button"
+                        onClick={() => setStep(Number(step))}
+                        className="shrink-0 underline underline-offset-2 hover:no-underline"
+                      >
+                        Go to step {step}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )
+            })()}
+          </div>
         )}
       </div>
 
