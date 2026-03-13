@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, Ship, MapPin, Package2, Calendar, Weight, FileText } from "lucide-react"
+import { Package2, MapPin, Calendar, Weight, FileText, Hash } from "lucide-react"
 import {
   Sheet,
   SheetContent,
@@ -15,7 +14,6 @@ import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 import { Separator } from "@workspace/ui/components/separator"
-import { Badge } from "@workspace/ui/components/badge"
 
 const CARGO_TYPES = [
   "Electronics",
@@ -41,36 +39,37 @@ const CARRIERS = [
   "Evergreen",
 ]
 
-const PRIORITIES = [
-  { value: "standard", label: "Standard", color: "text-muted-foreground" },
-  { value: "express", label: "Express", color: "text-amber-500" },
-  { value: "charter", label: "Charter", color: "text-[#00BCA8]" },
+const STATUSES = [
+  { value: "proposed", label: "Proposed" },
+  { value: "scheduled", label: "Scheduled" },
+  { value: "loading", label: "Loading" },
+  { value: "in_transit", label: "In Transit" },
+  { value: "delayed", label: "Delayed" },
+  { value: "delivered", label: "Delivered" },
 ]
 
 export function CreateShipmentSheet() {
-  const [priority, setPriority] = useState("standard")
-
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button size="sm" className="gap-1.5 bg-[#00BCA8] hover:bg-[#00a894] text-black font-semibold">
-          <Plus className="size-4" />
-          New Shipment
+          <Package2 className="size-4" />
+          Log Shipment
         </Button>
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-[520px] overflow-y-auto bg-background border-l border-border/60 p-0"
+        className="w-full sm:max-w-[520px] overflow-y-auto bg-background border-l border-border/60 gap-0 p-0"
       >
         <SheetHeader className="px-6 pt-6 pb-4">
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-lg bg-[#00BCA8]/10 border border-[#00BCA8]/20">
-              <Ship className="size-4 text-[#00BCA8]" />
+              <Package2 className="size-4 text-[#00BCA8]" />
             </div>
             <div>
-              <SheetTitle className="text-base font-semibold">Create Shipment</SheetTitle>
+              <SheetTitle className="text-base font-semibold">Log Existing Shipment</SheetTitle>
               <SheetDescription className="text-xs mt-0.5">
-                Register a new export shipment record
+                Add an already-booked shipment to track its progress
               </SheetDescription>
             </div>
           </div>
@@ -79,12 +78,53 @@ export function CreateShipmentSheet() {
         <Separator />
 
         <div className="px-6 py-5 space-y-6">
-          {/* Route Section */}
+          {/* Booking Reference */}
           <section className="space-y-3">
             <div className="flex items-center gap-2">
-              <MapPin className="size-3.5 text-[#00BCA8]" />
+              <Hash className="size-3.5 text-[#00BCA8]" />
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Trade Route
+                Booking Reference
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="bol" className="text-xs font-medium">Bill of Lading / AWB</Label>
+                <Input
+                  id="bol"
+                  placeholder="e.g. COSU1234567890"
+                  className="h-9 text-sm font-mono"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="booking-ref" className="text-xs font-medium">Carrier Booking Ref</Label>
+                <Input
+                  id="booking-ref"
+                  placeholder="e.g. BKG-00123"
+                  className="h-9 text-sm font-mono"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="current-status" className="text-xs font-medium">Current Status</Label>
+              <select
+                id="current-status"
+                className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-3 focus:ring-ring/50 dark:bg-input/30"
+              >
+                {STATUSES.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+          </section>
+
+          <Separator className="opacity-50" />
+
+          {/* Route */}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2">
+              <MapPin className="size-3.5 text-blue-400" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Route
               </span>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -117,17 +157,17 @@ export function CreateShipmentSheet() {
 
           <Separator className="opacity-50" />
 
-          {/* Schedule Section */}
+          {/* Schedule */}
           <section className="space-y-3">
             <div className="flex items-center gap-2">
-              <Calendar className="size-3.5 text-blue-500" />
+              <Calendar className="size-3.5 text-amber-400" />
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Schedule
               </span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="departure" className="text-xs font-medium">Departure Date</Label>
+                <Label htmlFor="departure" className="text-xs font-medium">Actual Departure</Label>
                 <Input id="departure" type="date" className="h-9 text-sm" />
               </div>
               <div className="space-y-1.5">
@@ -139,12 +179,12 @@ export function CreateShipmentSheet() {
 
           <Separator className="opacity-50" />
 
-          {/* Cargo Section */}
+          {/* Cargo */}
           <section className="space-y-3">
             <div className="flex items-center gap-2">
-              <Package2 className="size-3.5 text-amber-500" />
+              <Package2 className="size-3.5 text-purple-400" />
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Cargo Details
+                Cargo
               </span>
             </div>
             <div className="space-y-1.5">
@@ -182,56 +222,38 @@ export function CreateShipmentSheet() {
                 />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="cargo-value" className="text-xs font-medium">Declared Value (USD)</Label>
-              <Input
-                id="cargo-value"
-                type="text"
-                placeholder="$0.00"
-                className="h-9 text-sm font-mono"
-              />
-            </div>
           </section>
 
           <Separator className="opacity-50" />
 
-          {/* Carrier Section */}
+          {/* Carrier */}
           <section className="space-y-3">
             <div className="flex items-center gap-2">
-              <Ship className="size-3.5 text-purple-500" />
+              <FileText className="size-3.5 text-muted-foreground" />
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Carrier & Priority
+                Carrier &amp; Vessel
               </span>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="carrier" className="text-xs font-medium">Preferred Carrier</Label>
-              <select
-                id="carrier"
-                className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-3 focus:ring-ring/50 dark:bg-input/30"
-              >
-                <option value="">Any carrier</option>
-                {CARRIERS.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Service Priority</Label>
-              <div className="flex gap-2">
-                {PRIORITIES.map((p) => (
-                  <button
-                    key={p.value}
-                    type="button"
-                    onClick={() => setPriority(p.value)}
-                    className={`flex-1 rounded-lg border px-3 py-2 text-xs font-semibold transition-all duration-150 ${
-                      priority === p.value
-                        ? "border-[#00BCA8] bg-[#00BCA8]/10 text-[#00BCA8]"
-                        : "border-border text-muted-foreground hover:border-border/80 hover:bg-muted/30"
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="carrier" className="text-xs font-medium">Carrier</Label>
+                <select
+                  id="carrier"
+                  className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-3 focus:ring-ring/50 dark:bg-input/30"
+                >
+                  <option value="">Select carrier…</option>
+                  {CARRIERS.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="vessel" className="text-xs font-medium">Vessel Name</Label>
+                <Input
+                  id="vessel"
+                  placeholder="e.g. MSC OSCAR"
+                  className="h-9 text-sm font-mono"
+                />
               </div>
             </div>
           </section>
@@ -240,14 +262,11 @@ export function CreateShipmentSheet() {
 
           {/* Notes */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <FileText className="size-3.5 text-muted-foreground" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Notes
-              </span>
-            </div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Notes
+            </span>
             <textarea
-              placeholder="Special handling instructions, customs notes, etc."
+              placeholder="Tracking notes, customs reference, etc."
               rows={3}
               className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/50 resize-none dark:bg-input/30"
             />
@@ -258,14 +277,14 @@ export function CreateShipmentSheet() {
 
         <SheetFooter className="px-6 py-4 flex gap-3">
           <Button variant="outline" size="sm" className="flex-1">
-            Save as Draft
+            Cancel
           </Button>
           <Button
             size="sm"
             className="flex-1 bg-[#00BCA8] hover:bg-[#00a894] text-black font-semibold"
           >
-            <Plus className="size-3.5 mr-1.5" />
-            Create Shipment
+            <Package2 className="size-3.5 mr-1.5" />
+            Log Shipment
           </Button>
         </SheetFooter>
       </SheetContent>

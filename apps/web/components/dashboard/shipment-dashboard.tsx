@@ -30,7 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
-import { CreateShipmentSheet } from "./create-shipment-sheet"
+
 import { OrchestrateShipmentSheet } from "./orchestrate-shipment-sheet"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -589,7 +589,6 @@ export function ShipmentDashboard({ firstName }: { firstName: string }) {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <OrchestrateShipmentSheet />
-          <CreateShipmentSheet />
         </div>
       </div>
 
