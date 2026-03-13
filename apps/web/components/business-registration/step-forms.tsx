@@ -39,7 +39,7 @@ export function ContactDetailsStep({ formData, onChange, onSelectChange }: StepP
         />
       </Field>
       <Field>
-        <FieldLabel>Country</FieldLabel>
+        <FieldLabel>Business Location</FieldLabel>
         <Select value={formData.country} onValueChange={(v) => onSelectChange("country", v)}>
           <SelectTrigger className={SELECT_TRIGGER_CLS}>
             <SelectValue placeholder="Select country" />
