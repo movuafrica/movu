@@ -34,3 +34,13 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+
+# AI Agents
+.agent/
+.agents/
+.claude/
+.cline/
+.cursor/
+.kiro/
+.trae/
+.windsurf/
