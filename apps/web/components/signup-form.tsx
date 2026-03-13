@@ -38,7 +38,7 @@ export function SignupForm({
     await signUp.authenticateWithRedirect({
       strategy: provider,
       redirectUrl: "/sso-callback",
-      redirectUrlComplete: "/",
+      redirectUrlComplete: "/onboarding",
     })
   }
 
@@ -83,7 +83,7 @@ export function SignupForm({
       const result = await signUp.attemptEmailAddressVerification({ code })
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId })
-        router.push("/")
+        router.push("/onboarding")
       }
     } catch (err: unknown) {
       const clerkErr = err as { errors?: { message: string }[] }

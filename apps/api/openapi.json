@@ -49,6 +49,28 @@
         "tags": [
           "Accounts"
         ]
+      },
+      "patch": {
+        "operationId": "AccountsController_updateMe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterBusiness"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Accounts"
+        ]
       }
     },
     "/accounts/{id}": {
@@ -165,6 +187,78 @@
         ],
         "id": "CreateAccount"
       },
+      "RegisterBusiness": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "minLength": 1
+          },
+          "country": {
+            "type": "string",
+            "minLength": 1
+          },
+          "businessName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "businessRegistrationNumber": {
+            "type": "string",
+            "minLength": 1
+          },
+          "taxId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1
+          },
+          "postalCode": {
+            "type": "string",
+            "minLength": 1
+          },
+          "city": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tradeRole": {
+            "type": "string",
+            "enum": [
+              "IMPORTER",
+              "EXPORTER",
+              "FREIGHT_FORWARDER",
+              "CUSTOMS_BROKER",
+              "MANUFACTURER",
+              "DISTRIBUTOR",
+              "TRADER"
+            ]
+          }
+        },
+        "required": [
+          "fullName",
+          "email",
+          "phoneNumber",
+          "country",
+          "businessName",
+          "businessRegistrationNumber",
+          "taxId",
+          "address",
+          "postalCode",
+          "city",
+          "tradeRole"
+        ],
+        "id": "RegisterBusiness"
+      },
       "UpdateAccount": {
         "type": "object",
         "properties": {
@@ -176,6 +270,59 @@
             "enum": [
               "BUSINESS",
               "PERSONAL"
+            ]
+          },
+          "fullName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "minLength": 1
+          },
+          "country": {
+            "type": "string",
+            "minLength": 1
+          },
+          "businessName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "businessRegistrationNumber": {
+            "type": "string",
+            "minLength": 1
+          },
+          "taxId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1
+          },
+          "postalCode": {
+            "type": "string",
+            "minLength": 1
+          },
+          "city": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tradeRole": {
+            "type": "string",
+            "enum": [
+              "IMPORTER",
+              "EXPORTER",
+              "FREIGHT_FORWARDER",
+              "CUSTOMS_BROKER",
+              "MANUFACTURER",
+              "DISTRIBUTOR",
+              "TRADER"
             ]
           }
         },

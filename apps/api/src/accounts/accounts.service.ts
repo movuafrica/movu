@@ -4,6 +4,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { RegisterBusinessDto } from './dto/register-business.dto';
 import { DB_CONNECTION } from '../db/db.connection';
 import * as schema from './schema';
 
@@ -61,5 +62,37 @@ export class AccountsService {
       .returning();
     if (!account) throw new NotFoundException(`Account ${id} not found`);
     return account;
+  }
+
+  async upsertCurrentBusinessAccount(userId: string, dto: RegisterBusinessDto) {
+    const [existingAccount] = await this.db
+      .select()
+      .from(schema.accounts)
+      .where(eq(schema.accounts.userId, userId));
+
+    if (existingAccount) {
+      const [updatedAccount] = await this.db
+        .update(schema.accounts)
+        .set({ ...dto, kind: 'BUSINESS', updatedAt: new Date() })
+        .where(eq(schema.accounts.userId, userId))
+        .returning();
+
+      if (!updatedAccount) {
+        throw new NotFoundException(`Account for user ${userId} not found`);
+      }
+
+      return updatedAccount;
+    }
+
+    const [createdAccount] = await this.db
+      .insert(schema.accounts)
+      .values({ userId, kind: 'BUSINESS', ...dto })
+      .returning();
+
+    if (!createdAccount) {
+      throw new Error('Failed to create business account');
+    }
+
+    return createdAccount;
   }
 }

@@ -33,7 +33,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["AccountsController_updateMe"];
         trace?: never;
     };
     "/accounts/{id}": {
@@ -61,10 +61,38 @@ export interface components {
             /** @enum {string} */
             kind: "BUSINESS" | "PERSONAL";
         };
+        RegisterBusiness: {
+            fullName: string;
+            /** Format: email */
+            email: string;
+            phoneNumber: string;
+            country: string;
+            businessName: string;
+            businessRegistrationNumber: string;
+            taxId: string;
+            address: string;
+            postalCode: string;
+            city: string;
+            /** @enum {string} */
+            tradeRole: "IMPORTER" | "EXPORTER" | "FREIGHT_FORWARDER" | "CUSTOMS_BROKER" | "MANUFACTURER" | "DISTRIBUTOR" | "TRADER";
+        };
         UpdateAccount: {
             userId?: string;
             /** @enum {string} */
             kind?: "BUSINESS" | "PERSONAL";
+            fullName?: string;
+            /** Format: email */
+            email?: string;
+            phoneNumber?: string;
+            country?: string;
+            businessName?: string;
+            businessRegistrationNumber?: string;
+            taxId?: string;
+            address?: string;
+            postalCode?: string;
+            city?: string;
+            /** @enum {string} */
+            tradeRole?: "IMPORTER" | "EXPORTER" | "FREIGHT_FORWARDER" | "CUSTOMS_BROKER" | "MANUFACTURER" | "DISTRIBUTOR" | "TRADER";
         };
     };
     responses: never;
@@ -121,6 +149,27 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AccountsController_updateMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterBusiness"];
+            };
+        };
         responses: {
             200: {
                 headers: {

@@ -10,6 +10,7 @@ import {
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { RegisterBusinessDto } from './dto/register-business.dto';
 import { CurrentAuth } from '../common/auth/current-auth.decorator';
 import type { ClerkAuthContext } from '@workspace/schemas';
 
@@ -30,6 +31,14 @@ export class AccountsController {
   @Get('me')
   findMe(@CurrentAuth() auth: ClerkAuthContext) {
     return this.accountsService.findByUserId(auth.userId);
+  }
+
+  @Patch('me')
+  updateMe(
+    @CurrentAuth() auth: ClerkAuthContext,
+    @Body() dto: RegisterBusinessDto,
+  ) {
+    return this.accountsService.upsertCurrentBusinessAccount(auth.userId, dto);
   }
 
   @Get(':id')

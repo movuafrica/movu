@@ -8,6 +8,20 @@
       "when": 1772568383275,
       "tag": "0000_hot_ironclad",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773252303183,
+      "tag": "0001_add_business_registrations",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773260400000,
+      "tag": "0002_merge_business_registration_into_accounts",
+      "breakpoints": true
     }
   ]
 }
