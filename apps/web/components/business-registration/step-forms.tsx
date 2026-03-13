@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select"
 import { COUNTRIES, TRADE_ROLE_LABELS } from "./constants"
+import { PhoneInput } from "./phone-input"
 import type { StepProps } from "./types"
 
 const INPUT_CLS = "h-14 px-4 text-base rounded-xl"
@@ -31,7 +32,11 @@ export function ContactDetailsStep({ formData, onChange, onSelectChange }: StepP
       </Field>
       <Field>
         <FieldLabel htmlFor="phoneNumber">Phone Number</FieldLabel>
-        <Input id="phoneNumber" name="phoneNumber" type="tel" placeholder="Your phone number" value={formData.phoneNumber} onChange={onChange} required className={INPUT_CLS} />
+        <PhoneInput
+          value={formData.phoneNumber}
+          onChange={(v) => onSelectChange("phoneNumber", v)}
+          required
+        />
       </Field>
       <Field>
         <FieldLabel>Country</FieldLabel>

@@ -14,6 +14,7 @@ import { REGISTRATION_STEPS } from "./constants"
 import { INITIAL_FORM_DATA } from "./types"
 import type { RegistrationFormData } from "./types"
 import { completeBusinessRegistration } from "@/actions/onboarding/complete-business-registration"
+import { isValidPhoneNumber } from "./phone-input"
 import { MovuLogo } from "../movu-logo"
 
 const STEP_REQUIRED_FIELDS: (keyof RegistrationFormData)[][] = [
@@ -55,7 +56,9 @@ export function BusinessRegistrationForm() {
   const canProceed = () => {
     const fields = STEP_REQUIRED_FIELDS[step - 1]
     if (!fields) return true
-    return fields.every((f) => formData[f].trim() !== "")
+    if (!fields.every((f) => formData[f].trim() !== "")) return false
+    if (step === 1 && !isValidPhoneNumber(formData.phoneNumber)) return false
+    return true
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

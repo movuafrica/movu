@@ -177,3 +177,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* react-phone-number-input theme overrides */
+:root {
+  --PhoneInput-color--focus: var(--ring);
+  --PhoneInputCountrySelectArrow-color: var(--foreground);
+  --PhoneInputCountrySelectArrow-opacity: 0.6;
+  --PhoneInputCountryFlag-height: 1.2em;
+  --PhoneInputCountryFlag-borderColor: color-mix(in oklch, var(--foreground) 20%, transparent);
+  --PhoneInputCountryFlag-borderColor--focus: var(--ring);
+}
+
+/* Spacing + divider between country selector and number input */
+.phone-input-field {
+  --PhoneInputCountrySelectArrow-marginLeft: 0.4rem;
+}
+
+.phone-input-field .PhoneInputCountrySelectArrow {
+  display: none;
+}
+
+.phone-input-field .PhoneInputCountry {
+  padding-right: 0.625rem;
+  margin-right: 0.75rem;
+  border-right: 1px solid var(--input);
+}
