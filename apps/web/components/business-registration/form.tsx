@@ -81,6 +81,7 @@ export function BusinessRegistrationForm() {
       <MovuLogo />
       <p className="mt-2 text-sm text-muted-foreground">Register Your Business</p>
       {/* Hidden inputs so all fields are present when form submits on step 4 */}
+      <input type="hidden" name="email" value={formData.email} />
       <input type="hidden" name="country" value={formData.country} />
       <input type="hidden" name="tradeRole" value={formData.tradeRole} />
 
