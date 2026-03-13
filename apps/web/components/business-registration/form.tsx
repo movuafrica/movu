@@ -13,6 +13,7 @@ import { REGISTRATION_STEPS } from "./constants"
 import { INITIAL_FORM_DATA } from "./types"
 import type { RegistrationFormData } from "./types"
 import { completeBusinessRegistration } from "@/actions/onboarding/complete-business-registration"
+import { MovuLogo } from "../movu-logo"
 
 const STEP_REQUIRED_FIELDS: (keyof RegistrationFormData)[][] = [
   ["fullName", "email", "phoneNumber", "country"],
@@ -59,8 +60,11 @@ export function BusinessRegistrationForm() {
   return (
     <form
       action={action}
-      className="flex flex-col min-h-svh lg:min-h-0 px-5 pt-5 pb-10 lg:px-0 lg:pt-0 lg:pb-0"
+      className="flex flex-col min-h-svh lg:min-h-0 px-5 mt-5 pb-10 lg:px-0 lg:pt-0 lg:pb-0"
     >
+
+      <MovuLogo />
+      <p className="mt-2 text-sm text-muted-foreground">Register Your Business</p>
       {/* Hidden inputs so all fields are present when form submits on step 4 */}
       <input type="hidden" name="country" value={formData.country} />
       <input type="hidden" name="tradeRole" value={formData.tradeRole} />
@@ -71,7 +75,7 @@ export function BusinessRegistrationForm() {
           type="button"
           onClick={() => setStep((s) => s - 1)}
           aria-label="Go back"
-          className={`mb-8 -ml-1 flex items-center justify-center size-9 rounded-full text-foreground hover:bg-muted transition-colors ${step <= 1 ? "invisible pointer-events-none" : ""
+          className={` -ml-1 flex items-center justify-center size-9 rounded-full text-foreground hover:bg-muted transition-colors ${step <= 1 ? "invisible pointer-events-none" : ""
             }`}
         >
           <ChevronLeft className="size-5" />

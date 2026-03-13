@@ -31,37 +31,6 @@ export default async function BusinessRegistrationPage() {
   return (
     <div className="min-h-svh flex flex-col lg:flex-row">
       {/* Branded left panel — always dark regardless of theme */}
-      <aside className="dark bg-background text-foreground hidden lg:flex lg:w-105 xl:w-120 flex-col justify-between p-10 shrink-0">
-        <div>
-          <Link href="/">
-            <MovuLogo />
-          </Link>
-          <div className="mt-12">
-            <h1 className="text-2xl font-bold leading-tight">
-              Register Your Business
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Let&apos;s set up your business for smoother shipment
-            </p>
-          </div>
-
-          <nav className="mt-10 flex flex-col gap-4">
-            {REGISTRATION_STEPS.map((s) => (
-              <div key={s.number} className="flex items-center gap-3">
-                <span className="text-brand shrink-0">
-                  <Circle className="size-5" />
-                </span>
-                <span className="text-sm">{s.label}</span>
-              </div>
-            ))}
-          </nav>
-        </div>
-
-        <p className="text-xs text-muted-foreground">
-          Your trusted all-in-one platform for AfCFTA-ready compliance and trade finance
-        </p>
-      </aside>
-
       {/* Main content */}
       <div className="flex-1 flex flex-col">
         {/* Desktop top-right controls */}
