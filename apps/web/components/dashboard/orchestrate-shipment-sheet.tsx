@@ -151,7 +151,7 @@ function ManifestCard() {
         <div className="flex items-center gap-2">
           <Badge
             variant="secondary"
-            className="text-[9px] px-1.5 h-4 font-mono bg-amber-500/10 text-amber-400 border border-amber-400/20"
+            className="text-[9px] px-1.5 h-4 font-mono bg-slate-500/10 text-slate-400 border border-slate-400/20"
           >
             DRAFT
           </Badge>
@@ -305,7 +305,7 @@ export function OrchestrateShipmentSheet() {
         <Button
           size="sm"
           variant="outline"
-          className="gap-1.5 border-purple-500/40 text-purple-400 hover:bg-purple-500/10 hover:text-purple-300 hover:border-purple-400/60 font-semibold"
+          className="gap-1.5 bg-[#00BCA8] hover:bg-[#00a894] text-black font-semibold"
         >
           <Sparkles className="size-4" />
           Plan Shipment
@@ -318,8 +318,8 @@ export function OrchestrateShipmentSheet() {
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-6 pt-6 pb-4 shrink-0">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-purple-500/10 border border-purple-500/20">
-            <Sparkles className="size-4 text-purple-400" />
+          <div className="flex size-9 items-center justify-center rounded-lg bg-[#00BCA8]/10 border border-[#00BCA8]/20">
+            <Sparkles className="size-4 text-[#00BCA8]" />
           </div>
           <div>
             <p className="text-base font-semibold">AI Export Planner</p>

@@ -182,8 +182,8 @@ const SHIPMENTS: Shipment[] = [
 const PIE_DATA = [
   { label: "In Transit", value: 8, color: "#00BCA8" },
   { label: "Scheduled", value: 5, color: "#3B82F6" },
-  { label: "Loading", value: 3, color: "#F59E0B" },
-  { label: "Proposed", value: 4, color: "#A855F7" },
+  { label: "Loading", value: 3, color: "#64748B" },
+  { label: "Proposed", value: 4, color: "#1D4ED8" },
 ]
 
 const STATUS_CONFIG: Record<
@@ -199,9 +199,9 @@ const STATUS_CONFIG: Record<
   },
   loading: {
     label: "Loading",
-    textColor: "text-amber-400",
-    bgColor: "bg-amber-400/10",
-    borderColor: "border-amber-400/30",
+    textColor: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+    borderColor: "border-blue-500/30",
     icon: Anchor,
   },
   scheduled: {
@@ -213,9 +213,9 @@ const STATUS_CONFIG: Record<
   },
   proposed: {
     label: "Proposed",
-    textColor: "text-purple-400",
-    bgColor: "bg-purple-400/10",
-    borderColor: "border-purple-400/30",
+    textColor: "text-slate-400",
+    bgColor: "bg-slate-400/10",
+    borderColor: "border-slate-400/30",
     icon: FileText,
   },
   delivered: {
@@ -425,7 +425,7 @@ function UpcomingShipmentCard({ shipment }: { shipment: Shipment }) {
     shipment.status === "in_transit"
       ? "#00BCA8"
       : shipment.status === "loading"
-      ? "#F59E0B"
+      ? "#3B82F6"
       : shipment.status === "delayed"
       ? "#EF4444"
       : "#3B82F6"
@@ -562,16 +562,16 @@ export function ShipmentDashboard({ firstName }: { firstName: string }) {
       value: "4",
       sub: "Awaiting approval",
       icon: FileText,
-      color: "text-purple-400",
-      bg: "bg-purple-400/10",
+      color: "text-slate-400",
+      bg: "bg-slate-400/10",
     },
     {
       label: "On-Time Rate",
       value: "94%",
       sub: "↑ 2% vs last month",
       icon: TrendingUp,
-      color: "text-amber-400",
-      bg: "bg-amber-400/10",
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
     },
   ]
 
@@ -782,7 +782,7 @@ export function ShipmentDashboard({ firstName }: { firstName: string }) {
                               s.status === "in_transit"
                                 ? "#00BCA8"
                                 : s.status === "loading"
-                                ? "#F59E0B"
+                                ? "#3B82F6"
                                 : "#EF4444"
                             }
                           />
@@ -820,7 +820,7 @@ export function ShipmentDashboard({ firstName }: { firstName: string }) {
         <Card className="border-border/60 bg-card/60">
           <CardHeader className="px-4 py-3 pb-2">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="size-4 text-amber-400" />
+              <AlertTriangle className="size-4 text-red-500/70" />
               <CardTitle className="text-sm">Needs Attention</CardTitle>
             </div>
             <p className="text-xs text-muted-foreground/70 mt-0.5">Action required</p>
@@ -840,18 +840,18 @@ export function ShipmentDashboard({ firstName }: { firstName: string }) {
                 id: "SHP-2026-0139",
                 msg: "Awaiting carrier booking",
                 sub: "Tokyo → Seattle",
-                color: "text-purple-400",
-                bg: "bg-purple-400/10",
-                dot: "bg-purple-400",
+                color: "text-slate-400",
+                bg: "bg-slate-400/10",
+                dot: "bg-slate-400",
                 icon: FileText,
               },
               {
                 id: "SHP-2026-0137",
                 msg: "Customs docs incomplete",
                 sub: "Mumbai → London",
-                color: "text-amber-400",
-                bg: "bg-amber-400/10",
-                dot: "bg-amber-400",
+                color: "text-blue-500",
+                bg: "bg-blue-500/10",
+                dot: "bg-blue-500",
                 icon: FileText,
               },
               {
