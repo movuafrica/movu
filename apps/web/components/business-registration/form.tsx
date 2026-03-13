@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useActionState } from "react"
+import { useState, useActionState, useEffect } from "react"
+import { useUser } from "@clerk/nextjs"
 import { ChevronLeft } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -40,6 +41,16 @@ export function BusinessRegistrationForm() {
   const [state, action, isPending] = useActionState(completeBusinessRegistration, null)
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState<RegistrationFormData>(INITIAL_FORM_DATA)
+  const { user } = useUser()
+
+  useEffect(() => {
+    if (!user) return
+    setFormData((prev) => ({
+      ...prev,
+      fullName: user.fullName ?? prev.fullName,
+      email: user.primaryEmailAddress?.emailAddress ?? prev.email,
+    }))
+  }, [user])
 
   const canProceed = () => {
     const fields = STEP_REQUIRED_FIELDS[step - 1]

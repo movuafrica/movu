@@ -27,7 +27,7 @@ export function ContactDetailsStep({ formData, onChange, onSelectChange }: StepP
       </Field>
       <Field>
         <FieldLabel htmlFor="email">Email</FieldLabel>
-        <Input id="email" name="email" type="email" placeholder="Your email address" value={formData.email} onChange={onChange} required className={INPUT_CLS} />
+        <Input id="email" name="email" type="email" placeholder="Your email address" value={formData.email} onChange={onChange} required disabled className={INPUT_CLS} />
       </Field>
       <Field>
         <FieldLabel htmlFor="phoneNumber">Phone Number</FieldLabel>
