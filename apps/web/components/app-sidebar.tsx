@@ -75,7 +75,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === item.url}
+                  isActive={item.url === "/" ? pathname === "/" : pathname.startsWith(item.url)}
                   tooltip={item.title}
                 >
                   <Link href={item.url}>
