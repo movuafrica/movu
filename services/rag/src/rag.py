@@ -1,4 +1,5 @@
 import json
+import os
 import pickle
 from typing import List, Optional
 from pathlib import Path
@@ -15,11 +16,24 @@ from langchain_chroma import Chroma
 from langchain_core.messages import HumanMessage
 from dotenv import load_dotenv
 
+import chromadb
+
 
 CACHE_DIR = Path(".cache")
 CACHE_DIR.mkdir(exist_ok=True)
 
 load_dotenv()
+
+CHROMA_COLLECTION = "movu_rag"
+
+
+def _get_chroma_http_client() -> Optional[chromadb.HttpClient]:
+    """Return a ChromaDB HTTP client when CHROMA_HOST is set (production), else None (local dev)."""
+    host = os.environ.get("CHROMA_HOST")
+    if host:
+        port = int(os.environ.get("CHROMA_PORT", "8000"))
+        return chromadb.HttpClient(host=host, port=port)
+    return None
 
 
 def get_cache_path(file_path: str) -> Path:
@@ -269,17 +283,26 @@ def create_vector_store(
     print("🔮 Creating embeddings and storing in ChromaDB...")
 
     embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+    http_client = _get_chroma_http_client()
 
-    print("--- Creating vector store ---")
-    vectorstore = Chroma.from_documents(
-        documents=documents,
-        embedding=embedding_model,
-        persist_directory=persist_directory,
-        collection_metadata={"hnsw:space": "cosine"},
-    )
-    print("--- Finished creating vector store ---")
+    if http_client:
+        vectorstore = Chroma.from_documents(
+            documents=documents,
+            embedding=embedding_model,
+            client=http_client,
+            collection_name=CHROMA_COLLECTION,
+            collection_metadata={"hnsw:space": "cosine"},
+        )
+    else:
+        vectorstore = Chroma.from_documents(
+            documents=documents,
+            embedding=embedding_model,
+            persist_directory=persist_directory,
+            collection_name=CHROMA_COLLECTION,
+            collection_metadata={"hnsw:space": "cosine"},
+        )
 
-    print(f"✅ Vector store created and saved to {persist_directory}")
+    print(f"✅ Vector store created")
     return vectorstore
 
 
@@ -287,14 +310,34 @@ def load_or_create_vector_store(
     persist_directory: str = "dbv1/chroma_db",
 ) -> Optional[Chroma]:
     embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
-    if Path(persist_directory).exists():
-        print("✅ Vector store already exists, loading from disk")
-        return Chroma(
-            persist_directory=persist_directory,
-            embedding_function=embedding_model,
-            collection_metadata={"hnsw:space": "cosine"},
-        )
-    return None
+    http_client = _get_chroma_http_client()
+
+    if http_client:
+        try:
+            vs = Chroma(
+                embedding_function=embedding_model,
+                client=http_client,
+                collection_name=CHROMA_COLLECTION,
+                collection_metadata={"hnsw:space": "cosine"},
+            )
+            if vs._collection.count() > 0:
+                print("✅ Vector store loaded from ChromaDB HTTP server")
+                return vs
+            print("⚠️  ChromaDB collection is empty — run ingest first")
+            return None
+        except Exception as e:
+            print(f"⚠️  Could not connect to ChromaDB HTTP server: {e}")
+            return None
+    else:
+        if Path(persist_directory).exists():
+            print("✅ Vector store already exists, loading from disk")
+            return Chroma(
+                persist_directory=persist_directory,
+                embedding_function=embedding_model,
+                collection_name=CHROMA_COLLECTION,
+                collection_metadata={"hnsw:space": "cosine"},
+            )
+        return None
 
 
 def generate_final_answer(chunks: List[Document], query: str) -> str:

@@ -1,0 +1,82 @@
+services:
+  caddy:
+    image: caddy:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data       # TLS certificates (must persist across restarts)
+      - caddy-config:/config   # Caddy config cache
+    networks:
+      - movu
+    depends_on:
+      - web
+      - api
+      - rag
+
+  web:
+    image: ghcr.io/${GITHUB_REPOSITORY}/movu-web:latest
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - MOVU_API_URL=http://api:3001
+      - RAG_API_URL=http://rag:8000
+    networks:
+      - movu
+
+  api:
+    image: ghcr.io/${GITHUB_REPOSITORY}/movu-api:latest
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=${DATABASE_URL}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - CLERK_JWT_KEY=${CLERK_JWT_KEY}
+      - CLERK_AUTHORIZED_PARTIES=http://web:3000,${CLERK_AUTHORIZED_PARTIES}
+    networks:
+      - movu
+
+  rag:
+    image: ghcr.io/${GITHUB_REPOSITORY}/movu-rag:latest
+    restart: unless-stopped
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - CORS_ORIGINS=http://web:3000,${CORS_ORIGINS}
+    volumes:
+      - rag-docs:/app/docs
+      - rag-cache:/app/.cache
+    networks:
+      - movu
+    depends_on:
+      - chromadb
+
+  chromadb:
+    image: chromadb/chroma:latest
+    restart: unless-stopped
+    volumes:
+      - chroma-data:/chroma/chroma
+    networks:
+      - movu
+    # Exposed on 127.0.0.1 only for local admin/debugging; not public
+    ports:
+      - "127.0.0.1:8001:8000"
+
+networks:
+  movu:
+    driver: bridge
+
+volumes:
+  chroma-data:
+  rag-docs:
+  rag-cache:
+  caddy-data:
+  caddy-config:

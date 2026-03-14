@@ -1,0 +1,89 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Build, Push & Deploy
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set short SHA tag
+        id: tag
+        run: echo "sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+
+      # ── API image ───────────────────────────────────────────────────────────
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/movu-api:latest
+            ghcr.io/${{ github.repository }}/movu-api:${{ steps.tag.outputs.sha }}
+
+      # ── Web image ───────────────────────────────────────────────────────────
+      - name: Build and push web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          build-args: |
+            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_CLERK_SIGN_IN_URL=/login
+            NEXT_PUBLIC_CLERK_SIGN_UP_URL=/signup
+          tags: |
+            ghcr.io/${{ github.repository }}/movu-web:latest
+            ghcr.io/${{ github.repository }}/movu-web:${{ steps.tag.outputs.sha }}
+
+      # ── RAG image ───────────────────────────────────────────────────────────
+      - name: Build and push RAG image
+        uses: docker/build-push-action@v6
+        with:
+          context: services/rag
+          file: services/rag/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/movu-rag:latest
+            ghcr.io/${{ github.repository }}/movu-rag:${{ steps.tag.outputs.sha }}
+
+      # ── Deploy to EC2 ────────────────────────────────────────────────────────
+      - name: Copy compose config to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.prod.yml,Caddyfile,scripts/"
+          target: /opt/movu
+
+      - name: Run deploy script on EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            export GITHUB_REPOSITORY=${{ github.repository }}
+            bash /opt/movu/scripts/ec2-deploy.sh
