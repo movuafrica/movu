@@ -1,6 +1,6 @@
 'use server';
 
-import { getAuthenticatedClient } from '../../lib/api-client';
+import { getAuthenticatedClient } from '@/lib/api-client';
 
 export default async function me() {
   const client = await getAuthenticatedClient();

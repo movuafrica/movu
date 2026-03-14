@@ -44,3 +44,13 @@ npm-debug.log*
 .kiro/
 .trae/
 .windsurf/
+.opencode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+
