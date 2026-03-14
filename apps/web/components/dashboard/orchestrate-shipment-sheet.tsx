@@ -31,6 +31,13 @@ type ChatMessage = {
   role: "ai" | "user"
   content: string
   type?: "text" | "manifest"
+  /** Quick-reply options rendered as clickable chips below an AI message */
+  suggestions?: string[]
+}
+
+type FollowupResponse = {
+  content: string
+  suggestions?: string[]
 }
 
 // ─── Demo Seed Conversation ───────────────────────────────────────────────────
@@ -77,12 +84,49 @@ const SEED_MESSAGES: ChatMessage[] = [
     type: "manifest",
     content: "",
   },
+  {
+    id: "7",
+    role: "ai",
+    type: "text",
+    content: "The manifest looks good. What would you like to do next?",
+    suggestions: [
+      "Confirm manifest & plan the route",
+      "Edit cargo details first",
+      "Show me available carriers",
+      "Generate commercial invoice",
+      "I need to change the Incoterms",
+    ],
+  },
 ]
 
-const FOLLOWUP_RESPONSES = [
-  "I've noted your corrections. Once you confirm the manifest is accurate, I can generate your full commercial invoice, packing list, and certificate of origin — and suggest available carriers on the Lagos → Hamburg route. Ready to proceed?",
-  "Great — your export documents are queued. I'll now recommend 3 carrier options on this corridor based on your timeline and cargo type. Would you like ocean freight only, or should I also include air freight alternatives?",
-  "Understood. I'll flag this shipment for carrier selection. You can track its progress from the dashboard once a booking is confirmed.",
+const FOLLOWUP_RESPONSES: FollowupResponse[] = [
+  {
+    content:
+      "I've noted your corrections. Once you confirm the manifest is accurate, I can generate your full commercial invoice, packing list, and certificate of origin — and suggest available carriers on the Lagos → Hamburg route. Ready to proceed?",
+    suggestions: [
+      "Yes, generate all documents",
+      "Show carrier options first",
+      "I need to make another change",
+    ],
+  },
+  {
+    content:
+      "Great — your export documents are queued. I'll now recommend 3 carrier options on this corridor based on your timeline and cargo type. Would you like ocean freight only, or should I also include air freight alternatives?",
+    suggestions: [
+      "Ocean freight only",
+      "Include air freight options",
+      "What's the cost difference?",
+    ],
+  },
+  {
+    content:
+      "Understood. I'll flag this shipment for carrier selection. You can track its progress from the dashboard once a booking is confirmed. Is there anything else you'd like to adjust?",
+    suggestions: [
+      "All looks good, I'm done",
+      "Add a special handling note",
+      "Send me a summary by email",
+    ],
+  },
 ]
 
 // ─── Step Indicator ───────────────────────────────────────────────────────────
@@ -191,9 +235,43 @@ function ManifestCard() {
   )
 }
 
+// ─── Suggestion Chips ─────────────────────────────────────────────────────────
+
+function SuggestionChips({
+  suggestions,
+  onSelect,
+}: {
+  suggestions: string[]
+  onSelect: (text: string) => void
+}) {
+  return (
+    <div className="mt-2.5 flex flex-wrap gap-1.5">
+      {suggestions.map((s, i) => (
+        <button
+          key={i}
+          onClick={() => onSelect(s)}
+          className="inline-flex items-center gap-1 rounded-full border border-[#00BCA8]/35 bg-[#00BCA8]/8 px-2.5 py-1 text-[11px] font-medium text-[#00BCA8] transition-all duration-150 hover:bg-[#00BCA8]/18 hover:border-[#00BCA8]/60 hover:shadow-[0_0_8px_rgba(0,188,168,0.15)] active:scale-95 cursor-pointer"
+          style={{ animationDelay: `${i * 40}ms` }}
+        >
+          {s}
+          <ArrowRight className="size-2.5 opacity-60" />
+        </button>
+      ))}
+    </div>
+  )
+}
+
 // ─── Chat Bubble ──────────────────────────────────────────────────────────────
 
-function ChatBubble({ message }: { message: ChatMessage }) {
+function ChatBubble({
+  message,
+  isLatest,
+  onSuggestionSelect,
+}: {
+  message: ChatMessage
+  isLatest: boolean
+  onSuggestionSelect: (text: string) => void
+}) {
   const isAi = message.role === "ai"
 
   if (message.type === "manifest") {
@@ -215,10 +293,30 @@ function ChatBubble({ message }: { message: ChatMessage }) {
         <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#00BCA8]/15 border border-[#00BCA8]/25 mt-0.5">
           <Bot className="size-3.5 text-[#00BCA8]" />
         </div>
-        <div className="flex-1 min-w-0 rounded-xl rounded-tl-sm bg-muted/40 border border-border/40 px-3 py-2.5">
-          <div className="text-xs text-foreground/90 leading-relaxed whitespace-pre-wrap">
-            {message.content}
+        <div className="flex-1 min-w-0">
+          <div className="rounded-xl rounded-tl-sm bg-muted/40 border border-border/40 px-3 py-2.5">
+            <div className="text-xs text-foreground/90 leading-relaxed whitespace-pre-wrap">
+              {message.content}
+            </div>
           </div>
+          {isLatest && message.suggestions && message.suggestions.length > 0 && (
+            <SuggestionChips
+              suggestions={message.suggestions}
+              onSelect={onSuggestionSelect}
+            />
+          )}
+          {!isLatest && message.suggestions && message.suggestions.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {message.suggestions.map((s, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center rounded-full border border-border/30 bg-muted/20 px-2.5 py-1 text-[11px] text-muted-foreground/40 line-through decoration-1"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     )
@@ -268,8 +366,8 @@ export function OrchestrateShipmentSheet() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, isTyping])
 
-  const handleSend = () => {
-    const text = input.trim()
+  const handleSend = (overrideText?: string) => {
+    const text = (overrideText ?? input).trim()
     if (!text || isTyping) return
 
     const userMsg: ChatMessage = {
@@ -285,12 +383,13 @@ export function OrchestrateShipmentSheet() {
     setTimeout(() => {
       const response =
         FOLLOWUP_RESPONSES[followupIdx] ??
-        "I'm processing your request. In production, this connects to a live AI model."
+        { content: "I'm processing your request. In production, this connects to a live AI model." }
       const aiMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "ai",
         type: "text",
-        content: response,
+        content: response.content,
+        suggestions: response.suggestions,
       }
       setMessages((prev) => [...prev, aiMsg])
       setIsTyping(false)
@@ -335,8 +434,13 @@ export function OrchestrateShipmentSheet() {
 
         {/* Messages — flex-1 so it fills remaining height */}
         <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4">
-          {messages.map((msg) => (
-            <ChatBubble key={msg.id} message={msg} />
+          {messages.map((msg, i) => (
+            <ChatBubble
+              key={msg.id}
+              message={msg}
+              isLatest={i === messages.length - 1 && !isTyping}
+              onSuggestionSelect={handleSend}
+            />
           ))}
           {isTyping && <TypingIndicator />}
           <div ref={messagesEndRef} />
@@ -345,23 +449,28 @@ export function OrchestrateShipmentSheet() {
         <Separator />
 
         {/* Input bar */}
-        <div className="px-4 py-3 flex items-center gap-2 shrink-0">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Describe your order or ask a question…"
-            className="flex-1 text-sm h-9"
-            disabled={isTyping}
-          />
-          <Button
-            size="sm"
-            onClick={handleSend}
-            disabled={!input.trim() || isTyping}
-            className="h-9 w-9 p-0 bg-[#00BCA8] hover:bg-[#00a894] text-black shrink-0"
-          >
-            <Send className="size-4" />
-          </Button>
+        <div className="px-4 py-3 shrink-0">
+          <div className="flex items-center gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Type your own answer or pick a suggestion above…"
+              className="flex-1 text-sm h-9"
+              disabled={isTyping}
+            />
+            <Button
+              size="sm"
+              onClick={() => handleSend()}
+              disabled={!input.trim() || isTyping}
+              className="h-9 w-9 p-0 bg-[#00BCA8] hover:bg-[#00a894] text-black shrink-0"
+            >
+              <Send className="size-4" />
+            </Button>
+          </div>
+          <p className="mt-1.5 text-[10px] text-muted-foreground/40 text-center">
+            Select a suggestion above or type your own response
+          </p>
         </div>
       </SheetContent>
     </Sheet>

@@ -7,7 +7,8 @@ import {
   BarChart3,
   Home,
   Settings,
-  Users,
+  PackageSearch,
+  Route,
 } from "lucide-react"
 
 import {
@@ -20,32 +21,16 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarGroup,
-  SidebarGroupLabel,
 } from "@workspace/ui/components/sidebar"
 import { MovuLogo } from "@/components/movu-logo"
 import { NavUser } from "@/components/nav-user"
 
 const navItems = [
-  {
-    title: "Dashboard",
-    url: "/",
-    icon: Home,
-  },
-  {
-    title: "Analytics",
-    url: "/analytics",
-    icon: BarChart3,
-  },
-  {
-    title: "Team",
-    url: "/team",
-    icon: Users,
-  },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
-  },
+  { title: "Dashboard",       url: "/",          icon: Home,          soon: false },
+  { title: "Shipments",       url: "/shipments", icon: PackageSearch, soon: false },
+  { title: "Trade Corridors", url: "/corridors", icon: Route,         soon: false },
+  { title: "Analytics",       url: "/analytics", icon: BarChart3,     soon: true  },
+  { title: "Settings",        url: "/settings",  icon: Settings,      soon: true  },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -67,20 +52,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={item.url === "/" ? pathname === "/" : pathname.startsWith(item.url)}
-                  tooltip={item.title}
-                >
-                  <Link href={item.url}>
+            {navItems.map((item) =>
+              item.soon ? (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    tooltip={`${item.title} — coming soon`}
+                    disabled
+                    className="opacity-40 cursor-not-allowed"
+                  >
                     <item.icon />
                     <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ) : (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={item.url === "/" ? pathname === "/" : pathname.startsWith(item.url)}
+                    tooltip={item.title}
+                  >
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            )}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

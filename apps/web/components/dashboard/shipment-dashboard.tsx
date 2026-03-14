@@ -32,152 +32,8 @@ import {
 } from "@workspace/ui/components/dropdown-menu"
 
 import { OrchestrateShipmentSheet } from "./orchestrate-shipment-sheet"
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type ShipmentStatus = "in_transit" | "loading" | "scheduled" | "proposed" | "delivered" | "delayed"
-
-interface Shipment {
-  id: string
-  origin: string
-  originCode: string
-  destination: string
-  destinationCode: string
-  eta: string
-  daysOut: number
-  cargo: string
-  weight: string
-  status: ShipmentStatus
-  carrier: string
-  vessel: string
-  progress: number
-  corridor: string
-  value: string
-}
-
-// ─── Demo Data ────────────────────────────────────────────────────────────────
-
-const SHIPMENTS: Shipment[] = [
-  {
-    id: "SHP-2026-0142",
-    origin: "Shanghai",
-    originCode: "SHA",
-    destination: "Los Angeles",
-    destinationCode: "LAX",
-    eta: "Mar 18, 2026",
-    daysOut: 5,
-    cargo: "Electronics",
-    weight: "24.5t",
-    status: "in_transit",
-    carrier: "COSCO Shipping",
-    vessel: "COSCO PACIFIC",
-    progress: 68,
-    corridor: "Trans-Pacific",
-    value: "$1.2M",
-  },
-  {
-    id: "SHP-2026-0148",
-    origin: "Hamburg",
-    originCode: "HAM",
-    destination: "New York",
-    destinationCode: "NYC",
-    eta: "Mar 21, 2026",
-    daysOut: 8,
-    cargo: "Industrial Machinery",
-    weight: "38.2t",
-    status: "loading",
-    carrier: "MSC",
-    vessel: "MSC OSCAR",
-    progress: 15,
-    corridor: "North Atlantic",
-    value: "$840K",
-  },
-  {
-    id: "SHP-2026-0153",
-    origin: "Dubai",
-    originCode: "DXB",
-    destination: "Rotterdam",
-    destinationCode: "RTM",
-    eta: "Mar 24, 2026",
-    daysOut: 11,
-    cargo: "Petrochemicals",
-    weight: "52.1t",
-    status: "scheduled",
-    carrier: "Maersk Line",
-    vessel: "MAERSK ESSEN",
-    progress: 0,
-    corridor: "Middle East-Europe",
-    value: "$2.1M",
-  },
-  {
-    id: "SHP-2026-0139",
-    origin: "Tokyo",
-    originCode: "TKO",
-    destination: "Seattle",
-    destinationCode: "SEA",
-    eta: "Mar 25, 2026",
-    daysOut: 12,
-    cargo: "Automotive Parts",
-    weight: "18.7t",
-    status: "proposed",
-    carrier: "NYK Line",
-    vessel: "—",
-    progress: 0,
-    corridor: "Trans-Pacific",
-    value: "$560K",
-  },
-  {
-    id: "SHP-2026-0137",
-    origin: "Mumbai",
-    originCode: "BOM",
-    destination: "London",
-    destinationCode: "LHR",
-    eta: "Mar 27, 2026",
-    daysOut: 14,
-    cargo: "Textiles",
-    weight: "12.3t",
-    status: "proposed",
-    carrier: "Hapag-Lloyd",
-    vessel: "—",
-    progress: 0,
-    corridor: "Indian Ocean-Europe",
-    value: "$290K",
-  },
-  {
-    id: "SHP-2026-0131",
-    origin: "Singapore",
-    originCode: "SIN",
-    destination: "Sydney",
-    destinationCode: "SYD",
-    eta: "Mar 16, 2026",
-    daysOut: 3,
-    cargo: "Consumer Goods",
-    weight: "9.4t",
-    status: "in_transit",
-    carrier: "PIL",
-    vessel: "KOTA RAJIN",
-    progress: 82,
-    corridor: "SE Asia-Australia",
-    value: "$178K",
-  },
-  {
-    id: "SHP-2026-0129",
-    origin: "Rotterdam",
-    originCode: "RTM",
-    destination: "São Paulo",
-    destinationCode: "GRU",
-    eta: "Mar 14, 2026",
-    daysOut: 1,
-    cargo: "Pharmaceuticals",
-    weight: "3.2t",
-    status: "delayed",
-    carrier: "CMA CGM",
-    vessel: "CMA LIBRA",
-    progress: 91,
-    corridor: "Europe-South America",
-    value: "$4.5M",
-  },
-]
+import { SHIPMENTS } from "@/lib/demo-data"
+import type { Shipment, ShipmentStatus } from "@/lib/demo-data"
 
 const PIE_DATA = [
   { label: "In Transit", value: 8, color: "#00BCA8" },
@@ -237,7 +93,7 @@ const STATUS_CONFIG: Record<
 const DATE_RANGES = ["Today", "This Week", "This Month", "Quarter"] as const
 type DateRange = typeof DATE_RANGES[number]
 
-const CORRIDORS = [
+const CORRIDOR_FILTER_OPTIONS = [
   "All Corridors",
   "Trans-Pacific",
   "North Atlantic",
@@ -245,6 +101,8 @@ const CORRIDORS = [
   "SE Asia-Australia",
   "Indian Ocean-Europe",
   "Europe-South America",
+  "Asia-Europe",
+  "Asia-East Africa",
 ]
 
 // ─── Donut Chart ──────────────────────────────────────────────────────────────
@@ -654,7 +512,7 @@ export function ShipmentDashboard({ firstName }: { firstName: string }) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="min-w-44">
-            {CORRIDORS.map((c) => (
+            {CORRIDOR_FILTER_OPTIONS.map((c) => (
               <DropdownMenuItem
                 key={c}
                 onClick={() => setCorridorFilter(c)}
