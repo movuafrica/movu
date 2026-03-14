@@ -48,6 +48,7 @@ npm-debug.log*
 
 # Python
 __pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 *.pyd
