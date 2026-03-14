@@ -52,7 +52,7 @@ services:
       - CHROMA_PORT=8000
       - CORS_ORIGINS=http://web:3000,${CORS_ORIGINS}
     volumes:
-      - rag-docs:/app/docs
+      - /opt/movu/docs:/app/docs
       - rag-cache:/app/.cache
     networks:
       - movu
@@ -76,7 +76,6 @@ networks:
 
 volumes:
   chroma-data:
-  rag-docs:
   rag-cache:
   caddy-data:
   caddy-config:

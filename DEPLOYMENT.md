@@ -34,7 +34,7 @@ Configure these in **Settings → Secrets and variables → Actions**:
 | Name | Description |
 |---|---|
 | `EC2_HOST` | EC2 public IP or hostname |
-| `EC2_USER` | SSH user (e.g. `ubuntu`) |
+| `EC2_USER` | SSH user — `ec2-user` on Amazon Linux |
 | `EC2_SSH_KEY` | Full contents of the EC2 private key (PEM format) |
 | `CLERK_SECRET_KEY` | Clerk production secret key |
 | `CLERK_JWT_KEY` | Clerk JWT public key (from Clerk dashboard → Advanced) |
@@ -51,22 +51,32 @@ Configure these in **Settings → Secrets and variables → Actions**:
 
 ## EC2 Bootstrap (one-time, manual)
 
-SSH into the EC2 instance and run:
+SSH into the instance (`ssh -i your-key.pem ec2-user@<EC2_HOST>`) and run:
 
 ```bash
-# Install Docker
-sudo apt update && sudo apt install -y docker.io docker-compose-plugin
-sudo usermod -aG docker ubuntu
+# Install Docker (Amazon Linux 2023)
+sudo dnf install -y docker
+sudo systemctl enable --now docker
+sudo usermod -aG docker ec2-user
 newgrp docker
 
-# Create the deployment directory
-sudo mkdir -p /opt/movu
-sudo chown ubuntu:ubuntu /opt/movu
+# Install Docker Compose plugin
+COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep tag_name | cut -d '"' -f4)
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo curl -SL "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-linux-x86_64" \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+# Create the deployment directory and docs folder
+sudo mkdir -p /opt/movu/docs
+sudo chown ec2-user:ec2-user /opt/movu /opt/movu/docs
 
 # Create the .env file with production values (see .env.production.example)
 cp .env.production.example /opt/movu/.env
 nano /opt/movu/.env   # fill in all values, including DOMAIN=your-domain.com
 ```
+
+> **Amazon Linux 2 (AL2)?** Replace `dnf` with `yum` and add `amazon-linux-extras install docker` before the `yum install` step.
 
 Caddy takes care of TLS automatically on first startup — no certbot or extra steps needed. Just make sure:
 1. Your domain's DNS A record points to the EC2 instance's public IP.
@@ -76,7 +86,19 @@ Caddy will obtain a Let's Encrypt certificate on first request and auto-renew it
 
 ---
 
-## AWS Aurora Setup
+## AWS Infrastructure Setup
+
+### 1. Elastic IP
+
+Allocate an Elastic IP and associate it with your EC2 instance **before** pointing your domain's DNS. This gives the instance a stable public IP that survives reboots.
+
+1. EC2 Console → **Elastic IPs** → **Allocate Elastic IP address**
+2. Select the new IP → **Actions** → **Associate Elastic IP address** → pick your instance
+3. Use this IP for your domain's DNS A record and as `EC2_HOST` in GitHub Secrets
+
+> Elastic IPs are free while associated with a running instance. You're only charged if the IP is allocated but unattached.
+
+### 2. Aurora PostgreSQL
 
 1. Create an **Aurora PostgreSQL** cluster (Serverless v2 or provisioned, `t3.medium` compatible instance class).
 2. Set the initial database name to `movu`.
@@ -104,18 +126,17 @@ After bootstrapping the EC2 instance, push a commit to `main`. The CI workflow r
 
 ## Document Ingestion (RAG)
 
-Documents must be ingested separately — this is a manual step after new docs are added.
+Documents are served to the RAG container from `/opt/movu/docs` on the EC2 host via a bind mount. To add new documents:
 
 ```bash
-# On EC2: copy your docs into the rag-docs volume, then run ingest
+# Copy a document to the EC2 instance
+scp my-doc.pdf ec2-user@<EC2_HOST>:/opt/movu/docs/
+
+# Then trigger ingestion inside the running container
 docker compose -f /opt/movu/docker-compose.prod.yml exec rag python src/ingest.py
 ```
 
-Or use a bind mount by adjusting the `rag` volumes section in `docker-compose.prod.yml`:
-```yaml
-volumes:
-  - /opt/movu/docs:/app/docs
-```
+The ingest script caches processed chunks, so re-running it only processes new files.
 
 ---
 
