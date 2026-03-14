@@ -404,20 +404,21 @@ export function OrchestrateShipmentSheet() {
         <Separator />
 
         {/* Messages — flex-1 so it fills remaining height */}
-        <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4">
-          {messages.map((msg, i) => (
-            <ChatBubble
-              key={msg.id}
-              message={msg}
-              isLatest={i === messages.length - 1 && !isTyping}
-              onSuggestionSelect={handleSend}
-            />
-          ))}
-          {isTyping && <TypingIndicator />}
-          <div ref={messagesEndRef} />
+        <div className="relative flex-1 min-h-0">
+          <div className="overflow-y-auto h-full px-4 py-4 space-y-4">
+            {messages.map((msg, i) => (
+              <ChatBubble
+                key={msg.id}
+                message={msg}
+                isLatest={i === messages.length - 1 && !isTyping}
+                onSuggestionSelect={handleSend}
+              />
+            ))}
+            {isTyping && <TypingIndicator />}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-background" />
         </div>
-
-        <Separator />
 
         {/* Input bar */}
         <div className="px-4 py-3 shrink-0">
