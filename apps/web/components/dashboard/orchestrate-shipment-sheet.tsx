@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { sendChatMessage } from "@/actions/ai/chat"
 import {
   Sparkles,
-  Send,
+  ArrowUp,
   Bot,
   CheckCircle2,
   ArrowRight,
@@ -375,7 +375,7 @@ export function OrchestrateShipmentSheet() {
         <Button
           size="sm"
           variant="outline"
-          className="gap-1.5 bg-[#00BCA8] hover:bg-[#00a894] text-black font-semibold"
+          className="gap-1.5 bg-[#00BCA8] hover:bg-[#00a894] text-black font-semibold w-full sm:w-auto h-10 sm:h-8 text-sm sm:text-xs"
         >
           <Sparkles className="size-4" />
           Plan Shipment
@@ -384,7 +384,7 @@ export function OrchestrateShipmentSheet() {
 
       <SheetContent
         side="right"
-        className="w-full sm:max-w-[900px] gap-0 p-0 bg-background border-l border-border/60"
+        className="w-full max-w-full sm:!w-[35%] sm:!max-w-none gap-0 p-0 bg-background border-l border-border/60"
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-6 pt-6 pb-4 shrink-0">
@@ -434,9 +434,9 @@ export function OrchestrateShipmentSheet() {
               size="sm"
               onClick={() => handleSend()}
               disabled={!input.trim() || isTyping}
-              className="h-9 w-9 p-0 bg-[#00BCA8] hover:bg-[#00a894] text-black shrink-0"
+              className="h-9 w-9 p-0 rounded-full bg-[#00BCA8] hover:bg-[#00a894] text-black shrink-0"
             >
-              <Send className="size-4" />
+              <ArrowUp className="size-4" />
             </Button>
           </div>
           <p className="mt-1.5 text-[10px] text-muted-foreground/40 text-center">

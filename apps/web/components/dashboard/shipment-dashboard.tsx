@@ -445,7 +445,7 @@ export function ShipmentDashboard({ firstName }: { firstName: string }) {
             Shipment operations &amp; trade route management
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 w-full sm:w-auto sm:shrink-0">
           <OrchestrateShipmentSheet />
         </div>
       </div>
@@ -461,10 +461,10 @@ export function ShipmentDashboard({ firstName }: { firstName: string }) {
               key={r}
               type="button"
               onClick={() => setDateRange(r)}
-              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-150 ${
+              className={`px-2.5 py-1 text-xs font-medium transition-all duration-150 border-b-2 ${
                 dateRange === r
-                  ? "bg-[#00BCA8] text-black font-semibold"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  ? "border-b-[#00BCA8] text-foreground font-semibold"
+                  : "border-b-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               {r}
