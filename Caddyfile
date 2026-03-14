@@ -1,16 +1,22 @@
 # Caddyfile
 #
 # Caddy handles TLS automatically via Let's Encrypt — no certbot needed.
-# Set the DOMAIN env var on your EC2 instance (e.g. DOMAIN=movu.example.com).
-# Caddy will obtain and renew a certificate for it automatically.
+# Set the DOMAIN env var on your EC2 instance (e.g. DOMAIN=api.movu.example.com).
 #
-# For local testing, leave DOMAIN=localhost and Caddy will use its
-# built-in local CA (self-signed, trusted on your machine via `caddy trust`).
-#
-# Only the Next.js web app is exposed publicly. The NestJS API and FastAPI RAG
-# service are called server-side from within the Docker network and are never
-# reachable from the internet.
+# The web app is deployed on Vercel and calls these services over the public internet.
+# Both the API and RAG service are exposed here; no other service is reachable publicly.
 
 {$DOMAIN:localhost} {
-    reverse_proxy web:3000
+
+    # NestJS API — strip /api prefix before forwarding
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy api:3001
+    }
+
+    # FastAPI RAG service — strip /rag prefix before forwarding
+    handle /rag/* {
+        uri strip_prefix /rag
+        reverse_proxy rag:8000
+    }
 }

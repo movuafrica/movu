@@ -3,16 +3,16 @@
 ## Architecture Overview
 
 ```
-Internet
-  │
-  ▼
+                   Vercel
+                   Next.js web
+                      │
+          ┌───────────┴───────────┐
+          ▼                       ▼
 Caddy (EC2 :80/:443, automatic HTTPS)
-  └─► Next.js web  (internal :3000)
-        │
-        ├─► NestJS API   (internal :3001, server-side only)
-        └─► FastAPI RAG  (internal :8000, server-side only)
-                │
-                └─► ChromaDB  (internal :8000, host 127.0.0.1:8001)
+  ├─► /api/*  → NestJS API    (internal :3001)
+  └─► /rag/*  → FastAPI RAG   (internal :8000)
+                    │
+                    └─► ChromaDB  (internal :8000, host 127.0.0.1:8001)
 
 External:
   AWS Aurora PostgreSQL
@@ -22,7 +22,22 @@ External:
 
 **Recommended EC2 instance:** `t3.medium` (2 vCPU, 4 GB RAM). Upgrade to `t3.large` when traffic warrants.
 
-> **Why Caddy?** Caddy automatically obtains and renews TLS certificates from Let's Encrypt — no certbot, no cron jobs, no manual cert management. Just set your `DOMAIN` and it works.
+> The Next.js web app is deployed on **Vercel** (existing setup). Only the NestJS API and FastAPI RAG service run on EC2, exposed via Caddy with automatic HTTPS.
+
+---
+
+## Vercel Environment Variables
+
+Set these in your Vercel project settings for the production environment:
+
+| Variable | Value |
+|---|---|
+| `MOVU_API_URL` | `https://your-ec2-domain.com/api` |
+| `RAG_API_URL` | `https://your-ec2-domain.com/rag` |
+| `CLERK_SECRET_KEY` | Clerk production secret key |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk production publishable key |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | `/login` |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/signup` |
 
 ---
 
@@ -44,7 +59,6 @@ Configure these in **Settings → Secrets and variables → Actions**:
 ### Variables (not secret)
 | Name | Description |
 |---|---|
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk production publishable key |
 | `TURBO_TEAM` | Turbo remote cache team (existing) |
 
 ---

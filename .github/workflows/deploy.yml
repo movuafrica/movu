@@ -42,21 +42,6 @@ jobs:
             ghcr.io/${{ github.repository }}/movu-api:latest
             ghcr.io/${{ github.repository }}/movu-api:${{ steps.tag.outputs.sha }}
 
-      # ── Web image ───────────────────────────────────────────────────────────
-      - name: Build and push web image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: apps/web/Dockerfile
-          push: true
-          build-args: |
-            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
-            NEXT_PUBLIC_CLERK_SIGN_IN_URL=/login
-            NEXT_PUBLIC_CLERK_SIGN_UP_URL=/signup
-          tags: |
-            ghcr.io/${{ github.repository }}/movu-web:latest
-            ghcr.io/${{ github.repository }}/movu-web:${{ steps.tag.outputs.sha }}
-
       # ── RAG image ───────────────────────────────────────────────────────────
       - name: Build and push RAG image
         uses: docker/build-push-action@v6
