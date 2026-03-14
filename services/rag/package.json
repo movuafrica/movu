@@ -1,0 +1,10 @@
+{
+  "name": "@workspace/rag",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": ".venv/bin/uvicorn src.api:app --reload --port 8000",
+    "start": ".venv/bin/uvicorn src.api:app --host 0.0.0.0 --port 8000",
+    "ingest": ".venv/bin/python src/ingest.py"
+  }
+}

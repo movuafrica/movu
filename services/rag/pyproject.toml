@@ -1,0 +1,24 @@
+[project]
+name = "movu-rag"
+version = "1.0.0"
+description = "Movu RAG service — document ingestion and AI-powered Q&A via FastAPI"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.29.0",
+    "python-dotenv>=1.0.0",
+    "langchain>=0.2.0",
+    "langchain-core>=0.2.0",
+    "langchain-openai>=0.1.0",
+    "langchain-chroma>=0.1.0",
+    "openai>=1.30.0",
+    "chromadb>=0.5.0",
+    "unstructured[all-docs]>=0.14.0",
+    "taskipy>=1.13.0",
+]
+
+[tool.taskipy.tasks]
+dev     = { cmd = "uvicorn src.api:app --reload --port 8000", help = "Start the API in dev mode with hot-reload" }
+start   = { cmd = "uvicorn src.api:app --host 0.0.0.0 --port 8000", help = "Start the API in production mode" }
+ingest  = { cmd = "python src/ingest.py", help = "Run document ingestion into ChromaDB" }
+

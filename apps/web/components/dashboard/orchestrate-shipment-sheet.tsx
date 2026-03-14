@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { sendChatMessage } from "@/actions/ai/chat"
 import {
   Sparkles,
   Send,
@@ -32,11 +33,6 @@ type ChatMessage = {
   content: string
   type?: "text" | "manifest"
   /** Quick-reply options rendered as clickable chips below an AI message */
-  suggestions?: string[]
-}
-
-type FollowupResponse = {
-  content: string
   suggestions?: string[]
 }
 
@@ -95,36 +91,6 @@ const SEED_MESSAGES: ChatMessage[] = [
       "Show me available carriers",
       "Generate commercial invoice",
       "I need to change the Incoterms",
-    ],
-  },
-]
-
-const FOLLOWUP_RESPONSES: FollowupResponse[] = [
-  {
-    content:
-      "I've noted your corrections. Once you confirm the manifest is accurate, I can generate your full commercial invoice, packing list, and certificate of origin — and suggest available carriers on the Lagos → Hamburg route. Ready to proceed?",
-    suggestions: [
-      "Yes, generate all documents",
-      "Show carrier options first",
-      "I need to make another change",
-    ],
-  },
-  {
-    content:
-      "Great — your export documents are queued. I'll now recommend 3 carrier options on this corridor based on your timeline and cargo type. Would you like ocean freight only, or should I also include air freight alternatives?",
-    suggestions: [
-      "Ocean freight only",
-      "Include air freight options",
-      "What's the cost difference?",
-    ],
-  },
-  {
-    content:
-      "Understood. I'll flag this shipment for carrier selection. You can track its progress from the dashboard once a booking is confirmed. Is there anything else you'd like to adjust?",
-    suggestions: [
-      "All looks good, I'm done",
-      "Add a special handling note",
-      "Send me a summary by email",
     ],
   },
 ]
@@ -359,14 +325,13 @@ export function OrchestrateShipmentSheet() {
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [step, setStep] = useState(3)
-  const [followupIdx, setFollowupIdx] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, isTyping])
 
-  const handleSend = (overrideText?: string) => {
+  const handleSend = async (overrideText?: string) => {
     const text = (overrideText ?? input).trim()
     if (!text || isTyping) return
 
@@ -380,22 +345,28 @@ export function OrchestrateShipmentSheet() {
     setInput("")
     setIsTyping(true)
 
-    setTimeout(() => {
-      const response =
-        FOLLOWUP_RESPONSES[followupIdx] ??
-        { content: "I'm processing your request. In production, this connects to a live AI model." }
+    try {
+      const answer = await sendChatMessage(text)
       const aiMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "ai",
         type: "text",
-        content: response.content,
-        suggestions: response.suggestions,
+        content: answer,
       }
       setMessages((prev) => [...prev, aiMsg])
-      setIsTyping(false)
-      setFollowupIdx((prev) => prev + 1)
       setStep((prev) => Math.min(prev + 1, STEPS.length - 1))
-    }, 1200 + Math.random() * 600)
+    } catch {
+      const aiMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "ai",
+        type: "text",
+        content:
+          "Sorry, I couldn't reach the AI service right now. Please try again in a moment.",
+      }
+      setMessages((prev) => [...prev, aiMsg])
+    } finally {
+      setIsTyping(false)
+    }
   }
 
   return (
