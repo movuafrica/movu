@@ -60,5 +60,7 @@ venv/
 # RAG service
 services/rag/.cache/
 services/rag/dbv1/chroma_db/
+services/rag/docs/
+
 
 
