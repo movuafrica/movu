@@ -71,4 +71,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             export GITHUB_REPOSITORY=${{ github.repository }}
+            export GHCR_USERNAME=${{ github.actor }}
+            export GHCR_TOKEN=${{ secrets.GITHUB_TOKEN }}
             bash /opt/movu/scripts/ec2-deploy.sh

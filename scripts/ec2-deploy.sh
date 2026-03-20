@@ -6,6 +6,14 @@ set -euo pipefail
 DEPLOY_DIR="/opt/movu"
 COMPOSE="docker compose -f $DEPLOY_DIR/docker-compose.prod.yml"
 
+if [[ -z "${GHCR_USERNAME:-}" || -z "${GHCR_TOKEN:-}" ]]; then
+	echo "❌ GHCR credentials are missing. Set GHCR_USERNAME and GHCR_TOKEN."
+	exit 1
+fi
+
+echo "🔐 Logging in to GHCR..."
+echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+
 echo "🔐 Refreshing secrets from AWS Secrets Manager..."
 bash "$DEPLOY_DIR/fetch-secrets.sh"
 
