@@ -28,6 +28,12 @@ COPY --from=build /app/apps/api/src/db/migrations ./apps/api/dist/db/migrations
 # Shared packages source (required at runtime for workspace symlinks)
 COPY --from=build /app/packages ./packages
 
+# Materialize workspace package for runtime resolution in api/node_modules
+RUN rm -rf ./apps/api/node_modules/@workspace/schemas \
+	&& mkdir -p ./apps/api/node_modules/@workspace/schemas/dist
+COPY --from=build /app/packages/schemas/package.json ./apps/api/node_modules/@workspace/schemas/package.json
+COPY --from=build /app/packages/schemas/dist ./apps/api/node_modules/@workspace/schemas/dist
+
 WORKDIR /app/apps/api
 EXPOSE 3001
 CMD ["node", "dist/main.js"]
