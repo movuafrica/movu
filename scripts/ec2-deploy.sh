@@ -6,6 +6,9 @@ set -euo pipefail
 DEPLOY_DIR="/opt/movu"
 COMPOSE="docker compose -f $DEPLOY_DIR/docker-compose.prod.yml"
 
+echo "🔐 Refreshing secrets from AWS Secrets Manager..."
+bash "$DEPLOY_DIR/fetch-secrets.sh"
+
 echo "🚀 Pulling latest images..."
 $COMPOSE pull
 
