@@ -19,7 +19,7 @@ services:
       - rag
 
   api:
-    image: ghcr.io/${GITHUB_REPOSITORY}/movu-api:latest
+    image: ghcr.io/${GITHUB_REPOSITORY}/movu-api:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -32,7 +32,7 @@ services:
       - movu
 
   rag:
-    image: ghcr.io/${GITHUB_REPOSITORY}/movu-rag:latest
+    image: ghcr.io/${GITHUB_REPOSITORY}/movu-rag:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}

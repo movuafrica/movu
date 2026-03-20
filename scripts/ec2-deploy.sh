@@ -11,8 +11,14 @@ if [[ -z "${GHCR_USERNAME:-}" || -z "${GHCR_TOKEN:-}" ]]; then
 	exit 1
 fi
 
+if [[ -z "${IMAGE_TAG:-}" ]]; then
+	echo "❌ IMAGE_TAG is missing. Set IMAGE_TAG to the commit image tag to deploy."
+	exit 1
+fi
+
 echo "🔐 Logging in to GHCR..."
 echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+echo "🏷️  Deploying image tag: $IMAGE_TAG"
 
 echo "🔐 Refreshing secrets from AWS Secrets Manager..."
 bash "$DEPLOY_DIR/fetch-secrets.sh"
@@ -21,7 +27,7 @@ echo "🧹 Pruning unused Docker images/cache to free disk..."
 docker image prune -af || true
 docker builder prune -af || true
 
-echo "🚀 Pulling latest images..."
+echo "🚀 Pulling images for tag $IMAGE_TAG..."
 $COMPOSE pull
 
 echo "♻️  Restarting services..."
