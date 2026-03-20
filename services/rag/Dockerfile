@@ -1,15 +1,22 @@
 FROM python:3.12-slim
 
-# System dependencies required by unstructured[all-docs]
+# Keep runtime lean by default; install heavy OCR/office tools only when needed.
+ARG INSTALL_HEAVY_DOC_TOOLS=false
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     poppler-utils \
-    tesseract-ocr \
-    libreoffice \
     libmagic1 \
     libgl1 \
     libglib2.0-0 \
     curl \
     && rm -rf /var/lib/apt/lists/*
+
+RUN if [ "$INSTALL_HEAVY_DOC_TOOLS" = "true" ]; then \
+            apt-get update && apt-get install -y --no-install-recommends \
+            tesseract-ocr \
+            libreoffice \
+            && rm -rf /var/lib/apt/lists/*; \
+        fi
 
 WORKDIR /app
 

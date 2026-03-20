@@ -4,9 +4,6 @@ import pickle
 from typing import List, Optional
 from pathlib import Path
 
-# Unstructured for document parsing
-from unstructured.partition.pdf import partition_pdf
-from unstructured.partition.auto import partition as partition_auto
 from unstructured.chunking.title import chunk_by_title
 
 # LangChain components
@@ -25,6 +22,7 @@ CACHE_DIR.mkdir(exist_ok=True)
 load_dotenv()
 
 CHROMA_COLLECTION = "movu_rag"
+PDF_PARTITION_STRATEGY = os.environ.get("PDF_PARTITION_STRATEGY", "fast")
 
 
 def _get_chroma_http_client() -> Optional[chromadb.HttpClient]:
@@ -42,6 +40,8 @@ def get_cache_path(file_path: str) -> Path:
 
 
 def partition_document(file_path: str):
+    from unstructured.partition.auto import partition as partition_auto
+
     cache_path = get_cache_path(file_path)
 
     if cache_path.exists():
@@ -54,13 +54,18 @@ def partition_document(file_path: str):
     print(f"📄 Partitioning document: {file_path}")
     ext = Path(file_path).suffix.lower()
     if ext == ".pdf":
-        elements = partition_pdf(
-            filename=file_path,
-            strategy="hi_res",
-            infer_table_structure=True,
-            extract_image_block_types=["Image"],
-            extract_image_block_to_payload=True,
-        )
+        from unstructured.partition.pdf import partition_pdf
+
+        if PDF_PARTITION_STRATEGY == "hi_res":
+            elements = partition_pdf(
+                filename=file_path,
+                strategy="hi_res",
+                infer_table_structure=True,
+                extract_image_block_types=["Image"],
+                extract_image_block_to_payload=True,
+            )
+        else:
+            elements = partition_pdf(filename=file_path, strategy="fast")
     else:
         elements = partition_auto(filename=file_path)
     print(f"✅ Extracted {len(elements)} elements")

@@ -17,6 +17,10 @@ echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
 echo "🔐 Refreshing secrets from AWS Secrets Manager..."
 bash "$DEPLOY_DIR/fetch-secrets.sh"
 
+echo "🧹 Pruning unused Docker images/cache to free disk..."
+docker image prune -af || true
+docker builder prune -af || true
+
 echo "🚀 Pulling latest images..."
 $COMPOSE pull
 
