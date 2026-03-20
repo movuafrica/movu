@@ -9,6 +9,7 @@ WORKDIR /app
 
 COPY . .
 RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @workspace/schemas build
 RUN pnpm --filter api build
 
 # ── Runner stage ─────────────────────────────────────────────────────────────
