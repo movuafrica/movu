@@ -29,7 +29,9 @@ jobs:
 
       - name: Set short SHA tag
         id: tag
-        run: echo "sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+        run: |
+          SHA="${{ github.event.workflow_run.head_sha }}"
+          echo "sha=${SHA::8}" >> $GITHUB_OUTPUT
 
       # ── API image ───────────────────────────────────────────────────────────
       - name: Build and push API image
