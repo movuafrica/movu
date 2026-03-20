@@ -10,7 +10,7 @@ services:
       - DOMAIN=${DOMAIN}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data     # TLS certificates (must persist across restarts)
+      - caddy-data:/data # TLS certificates (must persist across restarts)
       - caddy-config:/config # Caddy config cache
     networks:
       - movu
