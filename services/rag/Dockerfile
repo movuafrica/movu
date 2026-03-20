@@ -12,11 +12,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN if [ "$INSTALL_HEAVY_DOC_TOOLS" = "true" ]; then \
-            apt-get update && apt-get install -y --no-install-recommends \
-            tesseract-ocr \
-            libreoffice \
-            && rm -rf /var/lib/apt/lists/*; \
-        fi
+    apt-get update && apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    libreoffice \
+    && rm -rf /var/lib/apt/lists/*; \
+    fi
 
 WORKDIR /app
 
