@@ -21,6 +21,9 @@ ENV NODE_ENV=production
 # did in the build stage.
 COPY --from=build /app ./
 
+# Drizzle reads migration SQL and meta files relative to dist/db/migrate.js.
+COPY --from=build /app/apps/api/src/db/migrations ./apps/api/dist/db/migrations
+
 WORKDIR /app/apps/api
 EXPOSE 3001
 CMD ["node", "dist/main.js"]
