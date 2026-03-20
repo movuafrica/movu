@@ -394,7 +394,7 @@ export function OrchestrateShipmentSheet() {
           <div>
             <p className="text-base font-semibold">AI Export Planner</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Describe your order and I'll guide you to a manifest
+              {"Describe your order and I'll guide you to a manifest"}
             </p>
           </div>
         </div>

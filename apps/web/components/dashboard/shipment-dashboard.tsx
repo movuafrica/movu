@@ -27,7 +27,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
 
@@ -144,14 +143,19 @@ function DonutChart({ data }: { data: typeof PIE_DATA }) {
   const gap = 3
   const total = data.reduce((s, d) => s + d.value, 0)
 
-  let cumAngle = 0
-  const slices = data.map((d) => {
-    const fullAngle = (d.value / total) * 360
-    const startAngle = cumAngle + gap / 2
-    const endAngle = cumAngle + fullAngle - gap / 2
-    cumAngle += fullAngle
-    return { ...d, startAngle, endAngle }
-  })
+  const slices = data.reduce(
+    (acc, d) => {
+      const fullAngle = (d.value / total) * 360
+      return {
+        items: [
+          ...acc.items,
+          { ...d, startAngle: acc.cum + gap / 2, endAngle: acc.cum + fullAngle - gap / 2 },
+        ],
+        cum: acc.cum + fullAngle,
+      }
+    },
+    { items: [] as Array<(typeof data)[number] & { startAngle: number; endAngle: number }>, cum: 0 },
+  ).items
 
   const active = hovered !== null ? slices[hovered] : null
 
@@ -278,7 +282,6 @@ function ProgressBar({ value, color }: { value: number; color: string }) {
 // ─── Upcoming Shipment Card ───────────────────────────────────────────────────
 
 function UpcomingShipmentCard({ shipment }: { shipment: Shipment }) {
-  const cfg = STATUS_CONFIG[shipment.status]
   const color =
     shipment.status === "in_transit"
       ? "#00BCA8"

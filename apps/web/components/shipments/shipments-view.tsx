@@ -14,7 +14,6 @@ import {
 } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
-import { Badge } from "@workspace/ui/components/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
