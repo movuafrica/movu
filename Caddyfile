@@ -25,6 +25,7 @@
         basicauth {
             admin $2a$14$t6o./sS5Tq6RN4i59AFC9eRzL99LZ.WhijnVffwNlHA60j54.JS02
         }
+        uri strip_prefix /drizzle
         reverse_proxy drizzle-studio:4983
     }
 }
