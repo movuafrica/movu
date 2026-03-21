@@ -34,6 +34,6 @@ echo "♻️  Restarting services..."
 $COMPOSE up -d --remove-orphans
 
 echo "🗄️  Running database migrations..."
-$COMPOSE exec -T api node dist/db/migrate.js
+$COMPOSE exec -T api node apps/api/dist/db/migrate.js
 
 echo "✅ Deployment complete."

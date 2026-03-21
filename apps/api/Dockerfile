@@ -1,29 +1,29 @@
-FROM node:22-slim AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+FROM node:lts-alpine AS pruner
 
-# ── Build stage ──────────────────────────────────────────────────────────────
-FROM base AS build
 WORKDIR /app
-
+RUN npm install -g turbo
 COPY . .
-RUN pnpm install --frozen-lockfile
-RUN pnpm --filter @workspace/schemas build
-RUN pnpm --filter api build
+RUN turbo prune --scope=api --docker
 
-# ── Runner stage ─────────────────────────────────────────────────────────────
-FROM node:22-slim AS runner
+FROM node:lts-alpine AS installer
+
+WORKDIR /app
+COPY --from=pruner /app/out/json .
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pruner /app/turbo.json ./turbo.json
+RUN npm install -g pnpm
+RUN pnpm install --frozen-lockfile
+
+FROM node:lts-alpine AS builder
+WORKDIR /app
+COPY --from=installer /app/ .
+COPY --from=pruner /app/out/full .
+RUN npm install -g pnpm
+RUN pnpm run build
+
+FROM node:lts-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+COPY --from=builder /app/ .
 
-# Copy the fully built workspace so pnpm workspace links resolve exactly as they
-# did in the build stage.
-COPY --from=build /app ./
-
-# Drizzle reads migration SQL and meta files relative to dist/db/migrate.js.
-COPY --from=build /app/apps/api/src/db/migrations ./apps/api/dist/db/migrations
-
-WORKDIR /app/apps/api
-EXPOSE 3001
-CMD ["node", "dist/main.js"]
+CMD ["node", "apps/api/dist/main"]
