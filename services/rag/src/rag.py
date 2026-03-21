@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import pickle
@@ -21,6 +22,8 @@ import chromadb
 
 CACHE_DIR = Path(".cache")
 CACHE_DIR.mkdir(exist_ok=True)
+ORIGINAL_CONTENT_DIR = CACHE_DIR / "original_content"
+ORIGINAL_CONTENT_DIR.mkdir(exist_ok=True)
 
 load_dotenv()
 
@@ -252,6 +255,51 @@ def mark_doc_embedded(file_path: str):
     EMBEDDED_DOCS_PATH.write_text(json.dumps(sorted(embedded)))
 
 
+def _store_original_content(original_content: dict) -> str:
+    serialized = json.dumps(original_content, sort_keys=True)
+    content_id = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+    content_path = ORIGINAL_CONTENT_DIR / f"{content_id}.json"
+
+    if not content_path.exists():
+        content_path.write_text(serialized)
+
+    return content_id
+
+
+def _load_original_content(chunk: Document) -> dict:
+    if "original_content" in chunk.metadata:
+        return json.loads(chunk.metadata["original_content"])
+
+    content_id = chunk.metadata.get("original_content_id")
+    if not content_id:
+        return {}
+
+    content_path = ORIGINAL_CONTENT_DIR / f"{content_id}.json"
+    if not content_path.exists():
+        print(f"⚠️  Missing original content sidecar: {content_path}")
+        return {}
+
+    return json.loads(content_path.read_text())
+
+
+def _prepare_documents_for_vector_store(documents: List[Document]) -> List[Document]:
+    prepared_documents = []
+
+    for doc in documents:
+        metadata = dict(doc.metadata)
+
+        if "original_content" in metadata:
+            content_id = _store_original_content(json.loads(metadata["original_content"]))
+            metadata.pop("original_content", None)
+            metadata["original_content_id"] = content_id
+
+        prepared_documents.append(
+            Document(page_content=doc.page_content, metadata=metadata)
+        )
+
+    return prepared_documents
+
+
 def summarise_chunks(chunks) -> List[Document]:
     print("🧠 Processing chunks with AI Summaries...")
 
@@ -286,17 +334,16 @@ def summarise_chunks(chunks) -> List[Document]:
             print(f"     → Using raw text (no tables/images)")
             enhanced_content = content_data["text"]
 
+        original_content = {
+            "raw_text": content_data["text"],
+            "tables_html": content_data["tables"],
+            "images_base64": content_data["images"],
+        }
+        content_id = _store_original_content(original_content)
+
         doc = Document(
             page_content=enhanced_content,
-            metadata={
-                "original_content": json.dumps(
-                    {
-                        "raw_text": content_data["text"],
-                        "tables_html": content_data["tables"],
-                        "images_base64": content_data["images"],
-                    }
-                )
-            },
+            metadata={"original_content_id": content_id},
         )
 
         langchain_documents.append(doc)
@@ -309,6 +356,7 @@ def create_vector_store(
     documents: List[Document], persist_directory: str = "dbv1/chroma_db"
 ) -> Chroma:
     print("🔮 Creating embeddings and storing in ChromaDB...")
+    documents = _prepare_documents_for_vector_store(documents)
 
     embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
     http_client = _get_chroma_http_client()
@@ -380,18 +428,17 @@ CONTENT TO ANALYZE:
         for i, chunk in enumerate(chunks):
             prompt_text += f"--- Document {i+1} ---\n"
 
-            if "original_content" in chunk.metadata:
-                original_data = json.loads(chunk.metadata["original_content"])
+            original_data = _load_original_content(chunk)
 
-                raw_text = original_data.get("raw_text", "")
-                if raw_text:
-                    prompt_text += f"TEXT:\n{raw_text}\n\n"
+            raw_text = original_data.get("raw_text", "")
+            if raw_text:
+                prompt_text += f"TEXT:\n{raw_text}\n\n"
 
-                tables_html = original_data.get("tables_html", [])
-                if tables_html:
-                    prompt_text += "TABLES:\n"
-                    for j, table in enumerate(tables_html):
-                        prompt_text += f"Table {j+1}:\n{table}\n\n"
+            tables_html = original_data.get("tables_html", [])
+            if tables_html:
+                prompt_text += "TABLES:\n"
+                for j, table in enumerate(tables_html):
+                    prompt_text += f"Table {j+1}:\n{table}\n\n"
 
             prompt_text += "\n"
 
@@ -403,19 +450,16 @@ ANSWER:"""
         message_content = [{"type": "text", "text": prompt_text}]
 
         for chunk in chunks:
-            if "original_content" in chunk.metadata:
-                original_data = json.loads(chunk.metadata["original_content"])
-                images_base64 = original_data.get("images_base64", [])
+            original_data = _load_original_content(chunk)
+            images_base64 = original_data.get("images_base64", [])
 
-                for image_base64 in images_base64:
-                    message_content.append(
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{image_base64}"
-                            },
-                        }
-                    )
+            for image_base64 in images_base64:
+                message_content.append(
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"},
+                    }
+                )
 
         message = HumanMessage(content=message_content)
         response = llm.invoke([message])

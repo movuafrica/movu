@@ -13,6 +13,7 @@ from rag import (
     load_summary_from_cache,
     mark_doc_embedded,
     partition_document,
+    _prepare_documents_for_vector_store,
     create_chunks_by_title,
     summarise_chunks,
     save_summary_to_cache,
@@ -76,7 +77,7 @@ def main():
         if db is None:
             db = create_vector_store(summarized_chunks)
         else:
-            db.add_documents(summarized_chunks)
+            db.add_documents(_prepare_documents_for_vector_store(summarized_chunks))
             print(f"✅ Added {len(summarized_chunks)} chunks to vector store")
 
         mark_doc_embedded(file_str)
