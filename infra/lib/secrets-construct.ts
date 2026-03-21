@@ -12,6 +12,7 @@ const APP_SECRET_TEMPLATE = {
   OPENAI_API_KEY: '',
   HF_TOKEN: '',
   CORS_ORIGINS: '',
+  RAG_S3_BUCKET: '',
 };
 
 export class SecretsConstruct extends Construct {

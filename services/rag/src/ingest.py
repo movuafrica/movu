@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 
+import boto3
 from dotenv import load_dotenv
 
 from rag import (
@@ -20,13 +21,39 @@ from rag import (
 load_dotenv()
 
 
+def sync_docs_from_s3() -> None:
+    bucket_name = os.environ.get("RAG_S3_BUCKET")
+    if not bucket_name:
+        return
+
+    docs_dir = Path("./docs")
+    docs_dir.mkdir(parents=True, exist_ok=True)
+
+    s3 = boto3.client("s3")
+    response = s3.list_objects_v2(Bucket=bucket_name)
+
+    for obj in response.get("Contents", []):
+        key = obj["Key"]
+        if key.endswith("/"):
+            continue
+
+        local_path = docs_dir / key
+        if local_path.exists():
+            continue
+
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+        print(f"⬇️  Downloading from S3: {key}")
+        s3.download_file(bucket_name, key, str(local_path))
+
+
 def main():
+    sync_docs_from_s3()
     docs_dir = Path("./docs")
     embedded_docs = load_embedded_docs()
     db = load_or_create_vector_store()
 
-    for file_path in sorted(docs_dir.iterdir()):
-        if file_path.is_dir() or file_path.name.startswith("."):
+    for file_path in sorted(docs_dir.rglob("*")):
+        if file_path.is_dir() or any(part.startswith(".") for part in file_path.parts):
             continue
 
         file_str = str(file_path)

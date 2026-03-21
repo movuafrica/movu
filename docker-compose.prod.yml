@@ -37,6 +37,7 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - HF_TOKEN=${HF_TOKEN}
+      - RAG_S3_BUCKET=movu-rag-documents-prod
       - CHROMA_API_KEY=${CHROMA_API_KEY}
       - CHROMA_DATABASE=${CHROMA_DATABASE}
       - CHROMA_TENANT=${CHROMA_TENANT}

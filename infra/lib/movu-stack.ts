@@ -4,6 +4,7 @@ import { VpcConstruct } from './vpc-construct';
 import { SecretsConstruct } from './secrets-construct';
 import { AuroraConstruct } from './aurora-construct';
 import { Ec2Construct } from './ec2-construct';
+import { S3Construct } from './s3-construct';
 
 export class MovuStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -11,6 +12,7 @@ export class MovuStack extends cdk.Stack {
 
     const vpcConstruct = new VpcConstruct(this, 'Vpc');
     const secretsConstruct = new SecretsConstruct(this, 'Secrets');
+    const s3Construct = new S3Construct(this, 'S3');
 
     // EC2 is created first so its security group can be passed to the Aurora construct.
     const ec2Construct = new Ec2Construct(this, 'Ec2', {
@@ -25,6 +27,7 @@ export class MovuStack extends cdk.Stack {
 
     // Allow the instance to read the auto-generated Aurora DB credentials secret.
     auroraConstruct.credentialsSecret.grantRead(ec2Construct.instance.role);
+    s3Construct.bucket.grantRead(ec2Construct.instance.role);
 
     // ── Stack outputs ───────────────────────────────────────────────────────
 
@@ -60,6 +63,11 @@ export class MovuStack extends cdk.Stack {
       value: secretsConstruct.appSecret.secretArn,
       description:
         'ARN of the app secret (movu/production) - populate all fields before first deploy',
+    });
+
+    new cdk.CfnOutput(this, 'RagDocumentsBucketName', {
+      value: s3Construct.bucket.bucketName,
+      description: 'S3 bucket for RAG documents - upload PDFs here before running ingest',
     });
   }
 }
