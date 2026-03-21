@@ -31,10 +31,17 @@ app.add_middleware(
 _vector_store = None
 
 
+def get_vector_store():
+    global _vector_store
+    if _vector_store is None:
+        _vector_store = load_or_create_vector_store()
+    return _vector_store
+
+
 @app.on_event("startup")
 async def startup_event():
     global _vector_store
-    _vector_store = load_or_create_vector_store()
+    _vector_store = get_vector_store()
     if _vector_store is None:
         print(
             "⚠️  Vector store not found. Run ingest.py first to index your documents."
@@ -51,7 +58,7 @@ class ChatResponse(BaseModel):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "vector_store_ready": _vector_store is not None}
+    return {"status": "ok", "vector_store_ready": get_vector_store() is not None}
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -59,13 +66,14 @@ async def chat(request: ChatRequest):
     if not request.prompt.strip():
         raise HTTPException(status_code=400, detail="Prompt must not be empty.")
 
-    if _vector_store is None:
+    vector_store = get_vector_store()
+    if vector_store is None:
         raise HTTPException(
             status_code=503,
             detail="Vector store is not available. Run ingest.py to index documents first.",
         )
 
-    retriever = _vector_store.as_retriever(search_kwargs={"k": 3})
+    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
     chunks = retriever.invoke(request.prompt)
     answer = generate_final_answer(chunks, request.prompt)
 
