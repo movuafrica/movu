@@ -26,6 +26,7 @@ coverage
 out/
 build
 dist
+*.tsbuildinfo
 
 
 # Debug
@@ -45,6 +46,7 @@ npm-debug.log*
 .trae/
 .windsurf/
 .opencode/
+.gemini/
 
 # Python
 __pycache__/
@@ -62,6 +64,5 @@ venv/
 services/rag/.cache/
 services/rag/dbv1/chroma_db/
 services/rag/docs/
-
 
 

@@ -19,7 +19,7 @@ WORKDIR /app
 COPY --from=installer /app/ .
 COPY --from=pruner /app/out/full .
 RUN npm install -g pnpm
-RUN pnpm run build
+RUN find . -name '*.tsbuildinfo' -delete && pnpm run build
 
 FROM node:lts-alpine AS runner
 WORKDIR /app
