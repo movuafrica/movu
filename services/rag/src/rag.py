@@ -28,6 +28,14 @@ ORIGINAL_CONTENT_DIR.mkdir(exist_ok=True)
 load_dotenv()
 
 CHROMA_COLLECTION = "movu_rag"
+REFUSAL_PATTERNS = (
+    "i'm sorry, i can't assist with that",
+    "i cannot assist with that",
+    "i can't assist with that",
+    "i’m sorry, i can’t assist with that",
+    "i’m unable to help with that",
+    "i cannot help with that",
+)
 
 
 # Singleton for ChromaDB CloudClient
@@ -167,32 +175,47 @@ def create_ai_enhanced_summary(
     try:
         llm = ChatOpenAI(model="gpt-4o", temperature=0)
 
-        prompt_text = f"""You are creating a searchable description for document content retrieval.
+        prompt_text = f"""You are creating a searchable retrieval summary for an internal document chunk.
 
-        CONTENT TO ANALYZE:
-        TEXT CONTENT:
-        {text}
+Your job is to convert the provided document content into a factual, high-recall summary for semantic search.
 
-        """
+Rules:
+- Stay grounded in the provided content only.
+- Do not answer the user's question.
+- Do not mention safety policies or refusal language.
+- If the content is noisy, incomplete, or hard to interpret, still extract keywords, entities, codes, numbers, headings, and likely topics.
+- Prefer recall over brevity.
+
+CONTENT TO ANALYZE:
+TEXT CONTENT:
+{text}
+
+"""
 
         if tables:
             prompt_text += "TABLES:\n"
             for i, table in enumerate(tables):
                 prompt_text += f"Table {i+1}:\n{table}\n\n"
 
-            prompt_text += """
-                YOUR TASK:
-                Generate a comprehensive, searchable description that covers:
+        if images:
+            prompt_text += f"IMAGES: {len(images)} image(s) attached for analysis.\n\n"
 
-                1. Key facts, numbers, and data points from text and tables
-                2. Main topics and concepts discussed  
-                3. Questions this content could answer
-                4. Visual content analysis (charts, diagrams, patterns in images)
-                5. Alternative search terms users might use
+        prompt_text += """YOUR TASK:
+Generate a comprehensive searchable description that includes:
 
-                Make it detailed and searchable - prioritize findability over brevity.
+1. Main topics, entities, document types, and concepts
+2. Key facts, numbers, dates, identifiers, product names, and codes
+3. Important details from tables and images, if present
+4. Questions this chunk could help answer
+5. Alternative search terms, synonyms, abbreviations, and related phrases
 
-                SEARCHABLE DESCRIPTION:"""
+Output requirements:
+- Write plain prose, not JSON.
+- Be specific and keyword-rich.
+- If the content is partially unreadable, say what is still clearly identifiable.
+- Never output a refusal. Never say you cannot assist.
+
+SEARCHABLE DESCRIPTION:"""
 
         message_content = [{"type": "text", "text": prompt_text}]
 
@@ -217,6 +240,18 @@ def create_ai_enhanced_summary(
         if images:
             summary += f" [Contains {len(images)} image(s)]"
         return summary
+
+
+def _detect_summary_issue(summary: str) -> Optional[str]:
+    normalized = summary.strip().lower()
+    if not normalized:
+        return "empty"
+
+    for pattern in REFUSAL_PATTERNS:
+        if pattern in normalized:
+            return "refusal"
+
+    return None
 
 
 def get_summary_cache_path(file_path: str) -> Path:
@@ -317,19 +352,38 @@ def summarise_chunks(chunks) -> List[Document]:
             f"     Tables: {len(content_data['tables'])}, Images: {len(content_data['images'])}"
         )
 
+        metadata = {
+            "content_types": ",".join(sorted(content_data["types"])),
+            "has_tables": len(content_data["tables"]) > 0,
+            "has_images": len(content_data["images"]) > 0,
+            "summary_status": "raw_text",
+        }
+
         if content_data["tables"] or content_data["images"]:
             print(f"     → Creating AI summary for mixed content...")
             try:
-                enhanced_content = create_ai_enhanced_summary(
+                ai_summary = create_ai_enhanced_summary(
                     content_data["text"],
                     content_data["tables"],
                     content_data["images"],
                 )
-                print(f"     → AI summary created successfully")
-                print(f"     → Enhanced content preview: {enhanced_content[:200]}...")
+                summary_issue = _detect_summary_issue(ai_summary)
+
+                if summary_issue is None:
+                    enhanced_content = ai_summary
+                    metadata["summary_status"] = "ai_summary"
+                    print(f"     → AI summary created successfully")
+                    print(f"     → Enhanced content preview: {enhanced_content[:200]}...")
+                else:
+                    enhanced_content = content_data["text"]
+                    metadata["summary_status"] = f"fallback_{summary_issue}"
+                    print(
+                        f"     ⚠️  AI summary returned {summary_issue}; falling back to raw text"
+                    )
             except Exception as e:
                 print(f"     ❌ AI summary failed: {e}")
                 enhanced_content = content_data["text"]
+                metadata["summary_status"] = "fallback_error"
         else:
             print(f"     → Using raw text (no tables/images)")
             enhanced_content = content_data["text"]
@@ -343,7 +397,7 @@ def summarise_chunks(chunks) -> List[Document]:
 
         doc = Document(
             page_content=enhanced_content,
-            metadata={"original_content_id": content_id},
+            metadata={**metadata, "original_content_id": content_id},
         )
 
         langchain_documents.append(doc)
