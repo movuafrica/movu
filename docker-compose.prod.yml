@@ -1,0 +1,78 @@
+services:
+  caddy:
+    image: caddy:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data # TLS certificates (must persist across restarts)
+      - caddy-config:/config # Caddy config cache
+    networks:
+      - movu
+    depends_on:
+      - api
+      - rag
+      - drizzle-studio
+
+  api:
+    image: ghcr.io/${GITHUB_REPOSITORY}/movu-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=${DATABASE_URL}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - CLERK_JWT_KEY=${CLERK_JWT_KEY}
+      - CLERK_AUTHORIZED_PARTIES=${CLERK_AUTHORIZED_PARTIES}
+    networks:
+      - movu
+
+  rag:
+    image: ghcr.io/${GITHUB_REPOSITORY}/movu-rag:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - RAG_S3_BUCKET=movu-rag-documents-prod
+      - CHROMA_API_KEY=${CHROMA_API_KEY}
+      - CHROMA_DATABASE=${CHROMA_DATABASE}
+      - CHROMA_TENANT=${CHROMA_TENANT}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - UNSTRUCTURED_API_KEY=${UNSTRUCTURED_API_KEY}
+    volumes:
+      - /opt/movu/docs:/app/docs
+      - rag-cache:/app/.cache
+    networks:
+      - movu
+
+  drizzle-studio:
+    image: ghcr.io/${GITHUB_REPOSITORY}/movu-api:${IMAGE_TAG:-latest}
+    working_dir: /app/apps/api
+    command:
+      [
+        "./node_modules/.bin/drizzle-kit",
+        "studio",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "4983",
+      ]
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    networks:
+      - movu
+    restart: unless-stopped
+
+networks:
+  movu:
+    driver: bridge
+
+volumes:
+  rag-cache:
+  caddy-data:
+  caddy-config:

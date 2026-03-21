@@ -1,0 +1,22 @@
+node_modules
+.git
+.gitignore
+**/.next
+**/dist
+**/.cache
+**/.env*
+**/*.log
+**/playwright-report
+**/test-results
+# RAG vector store and document data
+services/rag/dbv1
+services/rag/docs
+services/rag/.cache
+services/rag/src/__pycache__
+# Editor / OS
+.DS_Store
+**/.DS_Store
+.idea
+.vscode
+dist/
+out/

@@ -26,6 +26,7 @@ coverage
 out/
 build
 dist
+*.tsbuildinfo
 
 
 # Debug
@@ -34,17 +35,38 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+
+# AI Agents
+.agent/
+.agents/
+.claude/
+.cline/
+.cursor/
+.kiro/
+.trae/
+.windsurf/
+.opencode/
+.gemini/
+
+# Python
+__pycache__/
+**/__pycache__/
+**/*/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+**/.venv/
+env/
+venv/
+
+# RAG service
+services/rag/.cache/
+services/rag/dbv1/chroma_db/
+services/rag/docs/
+
 .cache
 docs
-db**
+db*
 
 
-#AI
-.agents/
-.agent
-.cline
-.claude
-.cursor
-.trae
-.windsurf
-.kiro
