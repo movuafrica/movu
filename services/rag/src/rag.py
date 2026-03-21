@@ -5,6 +5,9 @@ from typing import List, Optional
 from pathlib import Path
 
 from unstructured.chunking.title import chunk_by_title
+import unstructured_client
+from unstructured_client.models import operations, shared
+from unstructured.staging.base import elements_from_dicts
 
 # LangChain components
 from langchain_core.documents import Document
@@ -22,16 +25,39 @@ CACHE_DIR.mkdir(exist_ok=True)
 load_dotenv()
 
 CHROMA_COLLECTION = "movu_rag"
-PDF_PARTITION_STRATEGY = os.environ.get("PDF_PARTITION_STRATEGY", "fast")
 
 
-def _get_chroma_http_client() -> Optional[chromadb.HttpClient]:
-    """Return a ChromaDB HTTP client when CHROMA_HOST is set (production), else None (local dev)."""
-    host = os.environ.get("CHROMA_HOST")
-    if host:
-        port = int(os.environ.get("CHROMA_PORT", "8000"))
-        return chromadb.HttpClient(host=host, port=port)
+# Singleton for ChromaDB CloudClient
+_chroma_client: Optional[chromadb.CloudClient] = None
+
+def _get_chroma_http_client() -> Optional[chromadb.CloudClient]:
+    """Return a singleton ChromaDB CloudClient."""
+    global _chroma_client
+    if _chroma_client is not None:
+        return _chroma_client
+    api_key = os.environ.get("CHROMA_API_KEY")
+    tenant = os.environ.get("CHROMA_TENANT")
+    database = os.environ.get("CHROMA_DATABASE")
+    if api_key and tenant and database:
+        _chroma_client = chromadb.CloudClient(
+            api_key=api_key,
+            tenant=tenant,
+            database=database
+        )
+        return _chroma_client
     return None
+
+# Singleton for UnstructuredClient
+_unstructured_client: Optional[unstructured_client.UnstructuredClient] = None
+def _get_unstructured_client() -> unstructured_client.UnstructuredClient:
+    global _unstructured_client
+    if _unstructured_client is not None:
+        return _unstructured_client
+    api_key = os.environ.get("UNSTRUCTURED_API_KEY")
+    if not api_key:
+        raise RuntimeError("UNSTRUCTURED_API_KEY environment variable not set.")
+    _unstructured_client = unstructured_client.UnstructuredClient(api_key_auth=api_key)
+    return _unstructured_client
 
 
 def get_cache_path(file_path: str) -> Path:
@@ -40,8 +66,6 @@ def get_cache_path(file_path: str) -> Path:
 
 
 def partition_document(file_path: str):
-    from unstructured.partition.auto import partition as partition_auto
-
     cache_path = get_cache_path(file_path)
 
     if cache_path.exists():
@@ -51,24 +75,23 @@ def partition_document(file_path: str):
         print(f"✅ Loaded {len(elements)} elements from cache")
         return elements
 
-    print(f"📄 Partitioning document: {file_path}")
-    ext = Path(file_path).suffix.lower()
-    if ext == ".pdf":
-        from unstructured.partition.pdf import partition_pdf
-
-        if PDF_PARTITION_STRATEGY == "hi_res":
-            elements = partition_pdf(
-                filename=file_path,
-                strategy="hi_res",
-                infer_table_structure=True,
-                extract_image_block_types=["Image"],
-                extract_image_block_to_payload=True,
-            )
-        else:
-            elements = partition_pdf(filename=file_path, strategy="fast")
-    else:
-        elements = partition_auto(filename=file_path)
-    print(f"✅ Extracted {len(elements)} elements")
+    print(f"📄 Partitioning document via Unstructured API: {file_path}")
+    client = _get_unstructured_client()
+    with open(file_path, "rb") as f:
+        file_bytes = f.read()
+    params = shared.PartitionParameters(
+        files=shared.Files(content=file_bytes, file_name=os.path.basename(file_path)),
+        strategy=shared.Strategy.HI_RES,
+        extract_image_block_types=["Image"],
+        infer_table_structure=True,
+        split_pdf_page=True,
+        split_pdf_allow_failed=True,
+    )
+    req = operations.PartitionRequest(partition_parameters=params)
+    res = client.general.partition(request=req)
+    element_dicts = res.elements
+    elements = elements_from_dicts(element_dicts)
+    print(f"✅ Extracted {len(elements)} elements from Unstructured API")
 
     with open(cache_path, "wb") as f:
         pickle.dump(elements, f)

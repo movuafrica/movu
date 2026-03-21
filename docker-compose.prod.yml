@@ -37,34 +37,22 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - HF_TOKEN=${HF_TOKEN}
-      - CHROMA_HOST=chromadb
-      - CHROMA_PORT=8000
+      - CHROMA_API_KEY=${CHROMA_API_KEY}
+      - CHROMA_DATABASE=${CHROMA_DATABASE}
+      - CHROMA_TENANT=${CHROMA_TENANT}
       - CORS_ORIGINS=${CORS_ORIGINS}
+      - UNSTRUCTURED_API_KEY=${UNSTRUCTURED_API_KEY}
     volumes:
       - /opt/movu/docs:/app/docs
       - rag-cache:/app/.cache
     networks:
       - movu
-    depends_on:
-      - chromadb
-
-  chromadb:
-    image: chromadb/chroma:latest
-    restart: unless-stopped
-    volumes:
-      - chroma-data:/chroma/chroma
-    networks:
-      - movu
-    # Exposed on 127.0.0.1 only for local admin/debugging; not public
-    ports:
-      - "127.0.0.1:8001:8000"
 
 networks:
   movu:
     driver: bridge
 
 volumes:
-  chroma-data:
   rag-cache:
   caddy-data:
   caddy-config:
